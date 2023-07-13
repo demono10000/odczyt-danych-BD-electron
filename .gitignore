@@ -1,0 +1,17 @@
+.DS_Store
+Thumbs.db
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+dist/
+release/
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.atom/
+*.iml
+wyjscie/
+/secret.js

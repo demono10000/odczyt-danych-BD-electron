@@ -1,0 +1,120 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Odczyt Danych z Bazy Danych - Paweł Sołtys</title>
+    <!-- Polityka zabezpieczeń treści -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com;">
+    <style>
+        /* Stylizacje strony */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-align: right;
+        }
+
+        td {
+            text-align: right;
+        }
+
+        tr:nth-child(even):not(.total) {
+            background-color: #f2f2f2;
+        }
+
+        #year, #type {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .total {
+            background-color: lemonchiffon;
+            color: black;
+        }
+        .active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tabs {
+            margin: 20px 0;
+        }
+        .tabs button {
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            border-radius: 5px;
+            color: #ffffff;
+            background-color: #4CAF50;
+        }
+        .tabs button.active {
+            background-color: #ff5722;
+        }
+    </style>
+
+</head>
+<body>
+<div id="app">  <!-- Kontener dla aplikacji Vue.js -->
+    <div class="tabs">
+        <!-- Przyciski do przełączania między zakładkami. -->
+        <button v-bind:class="{ active: selectedTab === 'sales' }" v-on:click="selectedTab = 'sales'">Sprzedaż</button>
+        <button v-bind:class="{ active: selectedTab === 'orders' }" v-on:click="selectedTab = 'orders'">Zamówienia</button>
+    </div>
+    <div>
+        <!-- Kontrolki do wyboru roku i typu sumowania -->
+        <label for="year">Wybierz rok: </label>
+        <select id="year" v-model="selectedYear">
+            <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
+        </select>
+        <label for="type">Typ sumowania: </label>
+        <select id="type" v-model="selectedType">
+            <option value="monthly">Miesięczne</option>
+            <option value="weekly">Tygodniowe</option>
+        </select>
+    </div>
+    <table>
+        <!-- Wyświetlanie odpowiednich kolumn w zależności od wybranej zakładki -->
+        <tr>
+            <th v-if="selectedTab === 'sales'" v-for="column in columns" :key="column">{{ column }}</th>
+            <th v-if="selectedTab === 'orders'" v-for="column in orderColumns" :key="column">{{ column }}</th>
+        </tr>
+        <!-- Wyświetlanie danych z transformowanej tabeli -->
+        <tr v-for="row in transformedData" :key="row.period">
+            <td>{{ row.period || '-' }}</td>
+            <td v-for="column in columns.slice(1)" :key="column">{{ formatNumber(row[column]) || '-' }}</td>
+        </tr>
+        <!-- Wyświetlanie sumy -->
+        <tr class="total">
+            <td>Suma</td>
+            <td v-for="column in columns.slice(1)" :key="column">{{ formatNumber(total[column]) || '-' }}</td>
+        </tr>
+    </table>
+</div>
+<!-- Biblioteki skryptów -->
+<script src="https://unpkg.com/vue@next"></script>  <!-- Vue.js -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>  <!-- Axios.js -->
+<script src="renderer.js"></script>  <!-- Główny skrypt -->
+</body>
+</html>

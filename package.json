@@ -1,0 +1,57 @@
+{
+  "name": "odczyt_danych_bd",
+  "version": "1.2.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "keywords": [],
+  "author": "Paweł Sołtys",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv-webpack": "^8.0.1",
+    "electron": "^25.2.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mssql": "^9.1.1",
+    "vue": "^3.3.4"
+  },
+  "build": {
+    "appId": "pl.pawelsoltys.sumafaktur",
+    "mac": {
+      "target": [
+        "dmg",
+        "mas",
+        "pkg"
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "ikony/mac/favicon.icns"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "ikony/win/favicon.ico"
+    },
+    "mas": {
+      "type": "distribution"
+    },
+    "dmg": {
+      "sign": false
+    },
+    "directories": {
+      "buildResources": "buduj",
+      "output": "wyjscie"
+    },
+    "files": [
+      "**/*"
+    ]
+  }
+}
