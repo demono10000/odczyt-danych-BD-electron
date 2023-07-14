@@ -1,7 +1,7 @@
 // main.js
 /**
  * Autor: Paweł Sołtys
- * Data: 2023-07-13
+ * Data: 2023-07-14
  */
 
 // Importowanie modułów node.js
@@ -39,6 +39,7 @@ server.get('/data/:year/:type', async (req, res) => {
     const type = req.params.type;
     let query = '';
     if (type === 'monthly') {
+        // Miesięczne zapytanie
         query = `
             SELECT nag.TrN_TrNSeria AS Seria, nag.TrN_VatMiesiac AS Miesiac, SUM(elem.TrE_WartoscPoRabacie) AS Kwota
             FROM CDN.TraElem AS elem
@@ -48,6 +49,7 @@ server.get('/data/:year/:type', async (req, res) => {
             GROUP BY nag.TrN_TrNSeria, nag.TrN_VatMiesiac
         `;
     } else if (type === 'weekly') {
+        // Tygodniowe zapytanie
         query = `
             SELECT
                 nag.TrN_TrNSeria AS Seria,
@@ -65,8 +67,19 @@ server.get('/data/:year/:type', async (req, res) => {
             ORDER BY
                 Tydzien
         `;
+    } else if (type === 'yearly') {
+        // Roczne zapytanie
+        query = `
+            SELECT nag.TrN_TrNSeria AS Seria, nag.TrN_VatRok AS Rok, SUM(elem.TrE_WartoscPoRabacie) AS Kwota
+            FROM CDN.TraElem AS elem
+            LEFT JOIN CDN.TraNag AS nag
+            ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
+            WHERE nag.TrN_TrNSeria IN ('BEST', 'LAUF', 'SWG')
+            GROUP BY nag.TrN_TrNSeria, nag.TrN_VatRok
+            ORDER BY Rok DESC
+        `;
     } else {
-        res.status(400).send('Invalid type. It should be either "monthly" or "weekly".');
+        res.status(400).send('Invalid type. It should be either "monthly", "weekly" or "yearly".');
         return;
     }
     try {
@@ -83,6 +96,7 @@ server.get('/orders/:year/:type', async (req, res) => {
     const type = req.params.type;
     let query = '';
     if (type === 'monthly') {
+        // Miesięczne zapytanie
         query = `
             SELECT ZaN_ZamSeria AS Seria,
                    MONTH(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')) AS Miesiac,
@@ -90,10 +104,12 @@ server.get('/orders/:year/:type', async (req, res) => {
             FROM cdn.ZamElem AS elem
             LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
             WHERE YEAR(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')) = ${year}
+            AND ZaN_ZamSeria IN ('BEST', 'LAUF', 'SWG')
             GROUP BY ZaN_ZamSeria, MONTH(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01'))
             ORDER BY MONTH(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')), ZaN_ZamSeria
         `;
     } else if (type === 'weekly') {
+        // Tygodniowe zapytanie
         query = `
             SELECT
                 ZaN_ZamSeria AS Seria,
@@ -105,14 +121,25 @@ server.get('/orders/:year/:type', async (req, res) => {
                 ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
             WHERE
                 YEAR(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')) = ${year}
+                AND ZaN_ZamSeria IN ('BEST', 'LAUF', 'SWG')
             GROUP BY
                 ZaN_ZamSeria,
                 DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01'))
             ORDER BY
                 Tydzien, Seria
         `;
+    } else if (type === 'yearly') {
+        // Roczne zapytanie
+        query = `
+            SELECT ZaN_ZamSeria AS Seria, YEAR(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')) AS Rok, SUM(ZaE_Ilosc*ZaE_CenaUzgodniona) AS Kwota
+            FROM cdn.ZamElem AS elem
+            LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
+            WHERE ZaN_ZamSeria IN ('BEST', 'LAUF', 'SWG')
+            GROUP BY ZaN_ZamSeria, YEAR(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01'))
+            ORDER BY Rok DESC
+        `;
     } else {
-        res.status(400).send('Invalid type. It should be either "monthly" or "weekly".');
+        res.status(400).send('Invalid type. It should be either "monthly", "weekly" or "yearly".');
         return;
     }
     try {

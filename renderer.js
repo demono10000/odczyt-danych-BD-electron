@@ -6,7 +6,7 @@ const app = Vue.createApp({
         return {
             // Domyślne ustawienia dla aplikacji
             selectedYear: new Date().getFullYear(),  // wybrane lata
-            selectedType: 'monthly',  // wybrany typ (miesięczny/tygodniowy)
+            selectedType: 'monthly',  // wybrany typ (miesięczny/tygodniowy/roczny)
             selectedTab: 'sales',  // wybrana zakładka
             years: Array.from({length: new Date().getFullYear() - 2009 + 1}, (_, i) => new Date().getFullYear() - i).sort((a, b) => b - a),  // tablica lat
             data: [],  // dane z serwera
@@ -20,7 +20,8 @@ const app = Vue.createApp({
             this.fetchData()  // Pobierz dane przy zmianie roku
         },
         selectedType() {
-            this.fetchData()  // Pobierz dane przy zmianie typu (miesięczny/tygodniowy)
+            this.fetchData()  // Pobierz dane przy zmianie typu (miesięczny/tygodniowy/roczny)
+            this.updateColumns();  // Aktualizuj kolumny przy zmianie typu
         },
         selectedTab() {
             this.fetchData()  // Pobierz dane przy zmianie zakładki
@@ -48,13 +49,24 @@ const app = Vue.createApp({
             if (!value || isNaN(value)) return '-';
             const num = parseFloat(value);
             return num.toLocaleString('pl-PL', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        },
+        // Aktualizacja kolumn
+        updateColumns() {
+            let periodColumn;
+            if (this.selectedType === 'monthly') {
+                periodColumn = 'Miesiąc';
+            } else if (this.selectedType === 'weekly') {
+                periodColumn = 'Tydzień';
+            } else if (this.selectedType === 'yearly') {
+                periodColumn = 'Rok';
+            }
+            this.orderColumns = [periodColumn, 'BEST (EUR)', 'LAUF (EUR)', 'SWG (PLN)'];
         }
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn
         columns() {
-            let periodColumn = this.selectedType === 'monthly' ? 'Miesiąc' : 'Tydzień';
-            return [periodColumn, 'BEST (EUR)', 'LAUF (EUR)', 'SWG (PLN)'];
+            return this.orderColumns;
         },
         // Transformacja danych do wygodnego formatu
         transformedData() {
@@ -65,6 +77,8 @@ const app = Vue.createApp({
                     periodKey = this.months[item.Miesiac - 1];
                 } else if (this.selectedType === 'weekly') {
                     periodKey = 'Tydzień ' + item.Tydzien;
+                } else if (this.selectedType === 'yearly') {
+                    periodKey = item.Rok;
                 }
                 if (!data[periodKey]) {
                     data[periodKey] = {period: periodKey}
@@ -73,8 +87,16 @@ const app = Vue.createApp({
                 if (item.Seria === "SWG") waluta = '(PLN)'
                 data[periodKey][item.Seria + ' ' + waluta] = parseFloat(item.Kwota).toFixed(2)
             })
-            console.log(Object.values(data))
-            return Object.values(data)
+
+            let result = Object.values(data);
+
+            if (this.selectedType === 'yearly') {
+                // sortowanie danych rocznych w kolejności malejącej
+                result.sort((a, b) => b.period - a.period);
+            }
+
+            console.log(result)
+            return result;
         },
         // Obliczenie sumy dla każdej kolumny
         total() {
