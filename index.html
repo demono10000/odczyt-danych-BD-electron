@@ -164,6 +164,7 @@
                 </thead>
                 <tbody>
                 <tr v-for="row in filteredOrdersData" :key="row.orderId" :class="{ 'order-completed': row.zakończone === 'PRAWDA' }">
+                    <td>{{ row['Bestellung'] || '-' }}</td>
                     <td>{{ formatDate(row['Data']) || '-' }}</td>
                     <td>{{ row['Ilość'] || '-' }}</td>
                     <td>{{ formatCurrency(row['Cena']) || '-' }}</td>
@@ -172,6 +173,7 @@
                 <!-- Wyświetlanie sumy -->
                 <tr class="total">
                     <td>Suma</td>
+                    <td>-</td>
                     <td>{{ formatNumber(ordersTotal.Ilość) || '-' }}</td>
                     <td>-</td>
                     <td>{{ formatCurrency(ordersTotal.Wartość) || '-' }}</td>
@@ -190,6 +192,7 @@
                 </thead>
                 <tbody>
                 <tr v-for="row in filteredSalesData" :key="row.Data">
+                    <td>{{ row['Bestellung'] || '-' }}</td>
                     <td>{{ formatDate(row.Data) }}</td>
                     <td>{{ row.Ilość }}</td>
                     <td>{{ formatCurrency(row.Cena) }}</td>
@@ -198,6 +201,7 @@
                 <!-- Wyświetlanie sumy -->
                 <tr class="total">
                     <td>Suma</td>
+                    <td>-</td>
                     <td>{{ formatNumber(salesTotal.Ilość) || '-' }}</td>
                     <td>-</td>
                     <td>{{ formatCurrency(salesTotal.Wartość) || '-' }}</td>

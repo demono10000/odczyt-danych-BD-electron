@@ -18,10 +18,10 @@ const app = Vue.createApp({
             productDescription: '',  // opis wybranego produktu
             ordersData: [],  // dane zamówień dla wybranego produktu
             filteredOrdersData: [],  // dane zamówień dla wybranego produktu po filtrowaniu
-            LensesOrdersColumns: ['Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
+            LensesOrdersColumns: ['Bestellung', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
             salesData: [],  // dane sprzedaży dla wybranego produktu
             filteredSalesData: [],  // dane sprzedaży dla wybranego produktu po filtrowaniu
-            LensesSalesColumns: ['Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
+            LensesSalesColumns: ['Bestellung', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
             selectedStartDate: null,  // wybrana data początkowa
             selectedEndDate: null,  // wybrana data końcowa
         }

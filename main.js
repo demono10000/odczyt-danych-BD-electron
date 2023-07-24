@@ -174,6 +174,7 @@ server.get('/products', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+// soczewki - zamówienia
 server.get('/product-orders/:code', async (req, res) => {
     const code = req.params.code;
     const query = `
@@ -186,10 +187,11 @@ server.get('/product-orders/:code', async (req, res) => {
             WHEN ((nag.ZaN_Stan IN (19, 21, 35, 51, 53)) OR ((elem.ZaE_Ilosc - traelem.TrE_Ilosc) <= 0))
             THEN 'PRAWDA'
             ELSE 'FAŁSZ'
-        END AS zakończone
+        END AS zakończone,
+        nag.ZaN_DokumentObcy AS Bestellung
         FROM cdn.ZamElem AS elem
         LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
-        LEFT JOIN cdn.TraElem As traelem ON elem.ZaE_TwrKod = traelem.TrE_TwrKod AND nag.ZaN_DokumentObcy = traelem.TrE_TwrNazwa
+        LEFT JOIN cdn.TraElem As traelem ON elem.ZaE_TwrKod = traelem.TrE_TwrNazwa AND nag.ZaN_DokumentObcy = traelem.TrE_TwrNazwa
         WHERE elem.ZaE_Twrkod = '${code}'
         ORDER BY data DESC
     `;
@@ -221,18 +223,37 @@ server.get('/product-description/:code', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+// soczewki - sprzedaż
 server.get('/product-sales/:code', async (req, res) => {
     const code = req.params.code;
     const query = `
-        SELECT
+        WITH CTE AS (
+    SELECT
         DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien) As Data,
         elem.TrE_Ilosc As Ilość,
         elem.TrE_WartoscPoRabacie / elem.TrE_Ilosc As Cena,
-        elem.TrE_WartoscPoRabacie AS Wartość
-        FROM cdn.TraElem AS elem
-        LEFT JOIN cdn.TraNag AS nag ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
-        WHERE elem.TrE_Twrkod = '${code}' AND elem.TrE_KntTyp = 0
-        ORDER BY data DESC
+        elem.TrE_WartoscPoRabacie AS Wartość,
+        elem.TrE_TwrNazwa AS Bestellung,
+        elem.TrE_Twrkod,
+        elem.TrE_KntTyp,
+        ROW_NUMBER() OVER(PARTITION BY elem.TrE_Twrkod, elem.TrE_KntTyp, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien) ORDER BY (SELECT NULL)) as RN
+    FROM cdn.TraElem AS elem
+    LEFT JOIN cdn.TraNag AS nag ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
+    WHERE
+        elem.TrE_Twrkod = '${code}'
+)
+
+SELECT
+    t0.Data,
+    t0.Ilość,
+    t0.Cena,
+    t0.Wartość,
+    t32.Bestellung
+FROM CTE t0
+LEFT JOIN CTE t32 ON t0.Data = t32.Data AND t0.TrE_Twrkod = t32.TrE_Twrkod AND t0.RN = t32.RN AND t32.TrE_KntTyp = 32
+WHERE
+    t0.TrE_KntTyp = 0
+ORDER BY t0.Data DESC
     `;
 
     try {
