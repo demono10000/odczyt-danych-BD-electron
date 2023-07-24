@@ -1,7 +1,7 @@
 // main.js
 /**
  * Autor: Paweł Sołtys
- * Data: 2023-07-14
+ * Data: 2023-07-24
  */
 
 // Importowanie modułów node.js
@@ -148,6 +148,99 @@ server.get('/orders/:year/:type', async (req, res) => {
     } catch (err) {
         console.error(err)
         res.status(500).send(err.message)
+    }
+});
+// Obsługa zapytań GET do serwera, ścieżka '/products'
+server.get('/products', async (req, res) => {
+    const query = `
+        SELECT Kod_Towaru FROM
+        (
+            SELECT DISTINCT
+            elem.ZaE_Twrkod As Kod_Towaru
+            FROM cdn.ZamElem AS elem
+            UNION
+            SELECT DISTINCT
+            elem.TrE_Twrkod As Kod_Towaru
+            FROM cdn.TraElem AS elem
+        ) AS subquery
+        ORDER BY Kod_Towaru
+    `;
+
+    try {
+        const result = await sql.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+server.get('/product-orders/:code', async (req, res) => {
+    const code = req.params.code;
+    const query = `
+        SELECT
+        DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01') As Data,
+        elem.ZaE_Ilosc As Ilość,
+        elem.ZaE_cenaUzgodniona As Cena,
+        elem.ZaE_Ilosc*elem.ZaE_CenaUzgodniona AS Wartość,
+        CASE
+            WHEN ((nag.ZaN_Stan IN (19, 21, 35, 51, 53)) OR ((elem.ZaE_Ilosc - traelem.TrE_Ilosc) <= 0))
+            THEN 'PRAWDA'
+            ELSE 'FAŁSZ'
+        END AS zakończone
+        FROM cdn.ZamElem AS elem
+        LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
+        LEFT JOIN cdn.TraElem As traelem ON elem.ZaE_TwrKod = traelem.TrE_TwrKod AND nag.ZaN_DokumentObcy = traelem.TrE_TwrNazwa
+        WHERE elem.ZaE_Twrkod = '${code}'
+        ORDER BY data DESC
+    `;
+
+    try {
+        const result = await sql.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+// Obsługa zapytań GET do serwera, ścieżka '/product-description/:code'
+server.get('/product-description/:code', async (req, res) => {
+    const code = req.params.code;
+    const query = `
+        SELECT DISTINCT TOP 1
+        karty.Twr_Nazwa As nazwa_towaru
+        FROM cdn.ZamElem AS elem
+        LEFT JOIN cdn.TwrKarty As karty ON elem.ZaE_TwrKod = karty.Twr_Kod
+        WHERE elem.ZaE_Twrkod = '${code}'
+    `;
+
+    try {
+        const result = await sql.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+server.get('/product-sales/:code', async (req, res) => {
+    const code = req.params.code;
+    const query = `
+        SELECT
+        DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien) As Data,
+        elem.TrE_Ilosc As Ilość,
+        elem.TrE_WartoscPoRabacie / elem.TrE_Ilosc As Cena,
+        elem.TrE_WartoscPoRabacie AS Wartość
+        FROM cdn.TraElem AS elem
+        LEFT JOIN cdn.TraNag AS nag ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
+        WHERE elem.TrE_Twrkod = '${code}' AND elem.TrE_KntTyp = 0
+        ORDER BY data DESC
+    `;
+
+    try {
+        const result = await sql.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
     }
 });
 

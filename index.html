@@ -33,10 +33,6 @@
             text-align: right;
         }
 
-        tr:nth-child(even):not(.total) {
-            background-color: #f2f2f2;
-        }
-
         #year, #type {
             width: 100%;
             padding: 12px 20px;
@@ -67,10 +63,37 @@
             margin-right: 10px;
             border-radius: 5px;
             color: #ffffff;
-            background-color: #4CAF50;
+            background-color: #ff5722;
         }
         .tabs button.active {
-            background-color: #ff5722;
+            background-color: #4CAF50;
+        }
+        tr:nth-child(even):not(.total):not(.order-completed) {
+            background-color: #f2f2f2;
+        }
+        .order-completed {
+            background-color: khaki;
+        }
+        .scrollable-table {
+            height: 30vh;
+            overflow-y: auto;
+            display: block;
+        }
+        .filter-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-panel select, .filter-panel input[type="text"], .filter-panel input[type="date"] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
         }
     </style>
 
@@ -81,37 +104,108 @@
         <!-- Przyciski do przełączania między zakładkami. -->
         <button v-bind:class="{ active: selectedTab === 'sales' }" v-on:click="selectedTab = 'sales'">Sprzedaż</button>
         <button v-bind:class="{ active: selectedTab === 'orders' }" v-on:click="selectedTab = 'orders'">Zamówienia</button>
+        <button v-bind:class="{ active: selectedTab === 'lenses' }" v-on:click="selectedTab = 'lenses'">Soczewki</button>
     </div>
-    <div>
-        <!-- Kontrolki do wyboru roku i typu sumowania -->
-        <label for="year">Wybierz rok: </label>
-        <select id="year" v-model="selectedYear">
-            <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
-        </select>
-        <label for="type">Typ sumowania: </label>
-        <select id="type" v-model="selectedType">
-            <option value="monthly">Miesięczne</option>
-            <option value="weekly">Tygodniowe</option>
-            <option value="yearly">Roczne</option>
-        </select>
+    <div v-show="selectedTab === 'sales' || selectedTab === 'orders'">
+        <div>
+            <!-- Kontrolki do wyboru roku i typu sumowania -->
+            <label for="year" v-show="selectedType !== 'yearly'">Wybierz rok: </label>
+            <select id="year" v-model="selectedYear" v-show="selectedType !== 'yearly'">
+                <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
+            </select>
+            <label for="type">Typ sumowania: </label>
+            <select id="type" v-model="selectedType">
+                <option value="monthly">Miesięczne</option>
+                <option value="weekly">Tygodniowe</option>
+                <option value="yearly">Roczne</option>
+            </select>
+        </div>
+        <table>
+            <!-- Wyświetlanie odpowiednich kolumn w zależności od wybranej zakładki -->
+            <tr>
+                <th v-if="selectedTab === 'sales'" v-for="column in columns" :key="column">{{ column }}</th>
+                <th v-if="selectedTab === 'orders'" v-for="column in orderColumns" :key="column">{{ column }}</th>
+            </tr>
+            <!-- Wyświetlanie danych z transformowanej tabeli -->
+            <tr v-for="row in transformedData" :key="row.period">
+                <td>{{ row.period || '-' }}</td>
+                <td v-for="column in columns.slice(1)" :key="column">{{ formatNumber(row[column]) || '-' }}</td>
+            </tr>
+            <!-- Wyświetlanie sumy -->
+            <tr class="total">
+                <td>Suma</td>
+                <td v-for="column in columns.slice(1)" :key="column">{{ formatNumber(total[column]) || '-' }}</td>
+            </tr>
+        </table>
     </div>
-    <table>
-        <!-- Wyświetlanie odpowiednich kolumn w zależności od wybranej zakładki -->
-        <tr>
-            <th v-if="selectedTab === 'sales'" v-for="column in columns" :key="column">{{ column }}</th>
-            <th v-if="selectedTab === 'orders'" v-for="column in orderColumns" :key="column">{{ column }}</th>
-        </tr>
-        <!-- Wyświetlanie danych z transformowanej tabeli -->
-        <tr v-for="row in transformedData" :key="row.period">
-            <td>{{ row.period || '-' }}</td>
-            <td v-for="column in columns.slice(1)" :key="column">{{ formatNumber(row[column]) || '-' }}</td>
-        </tr>
-        <!-- Wyświetlanie sumy -->
-        <tr class="total">
-            <td>Suma</td>
-            <td v-for="column in columns.slice(1)" :key="column">{{ formatNumber(total[column]) || '-' }}</td>
-        </tr>
-    </table>
+    <div v-show="selectedTab === 'lenses'">
+        <div class="filter-panel">
+            <!-- Kontrolki do wyboru kodu towaru -->
+            <label for="product">Wybierz towar: </label>
+            <select id="product" v-model="selectedProduct">
+                <option v-for="product in filteredProducts" :value="product.Kod_Towaru" :key="product.Kod_Towaru">{{ product.Kod_Towaru }}</option>
+            </select>
+            <input type="text" v-model="productFilter" placeholder="Filtruj towary..." />
+            <label for="startDate">Data początkowa: </label>
+            <input type="date" id="startDate" v-model="selectedStartDate">
+            <label for="endDate">Data końcowa: </label>
+            <input type="date" id="endDate" v-model="selectedEndDate">
+        </div>
+        <!-- Wyświetlanie opisu towaru -->
+        <p>{{ productDescription }}</p>
+        <!-- Tabela zamówień -->
+        <h2>Zamówienia</h2>
+        <div class="scrollable-table">
+            <table>
+                <thead>
+                <tr>
+                    <th v-for="column in LensesOrdersColumns" :key="column">{{ column }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="row in filteredOrdersData" :key="row.orderId" :class="{ 'order-completed': row.zakończone === 'PRAWDA' }">
+                    <td>{{ formatDate(row['Data']) || '-' }}</td>
+                    <td>{{ row['Ilość'] || '-' }}</td>
+                    <td>{{ formatCurrency(row['Cena']) || '-' }}</td>
+                    <td>{{ formatCurrency(row['Wartość']) || '-' }}</td>
+                </tr>
+                <!-- Wyświetlanie sumy -->
+                <tr class="total">
+                    <td>Suma</td>
+                    <td>{{ formatNumber(ordersTotal.Ilość) || '-' }}</td>
+                    <td>-</td>
+                    <td>{{ formatCurrency(ordersTotal.Wartość) || '-' }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Tabela sprzedaży -->
+        <h2>Sprzedaż</h2>
+        <div class="scrollable-table">
+            <table>
+                <thead>
+                <tr>
+                    <th v-for="column in LensesSalesColumns" :key="column">{{ column }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="row in filteredSalesData" :key="row.Data">
+                    <td>{{ formatDate(row.Data) }}</td>
+                    <td>{{ row.Ilość }}</td>
+                    <td>{{ formatCurrency(row.Cena) }}</td>
+                    <td>{{ formatCurrency(row.Wartość) }}</td>
+                </tr>
+                <!-- Wyświetlanie sumy -->
+                <tr class="total">
+                    <td>Suma</td>
+                    <td>{{ formatNumber(salesTotal.Ilość) || '-' }}</td>
+                    <td>-</td>
+                    <td>{{ formatCurrency(salesTotal.Wartość) || '-' }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 <!-- Biblioteki skryptów -->
 <script src="https://unpkg.com/vue@next"></script>  <!-- Vue.js -->

@@ -12,6 +12,18 @@ const app = Vue.createApp({
             data: [],  // dane z serwera
             months: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],  // nazwy miesięcy
             orderColumns: ['Miesiąc', 'BEST (EUR)', 'LAUF (EUR)', 'SWG (PLN)'],  // kolumny dla zamówień
+            products: [],  // lista wszystkich kodów produktów
+            selectedProduct: null,  // wybrany kod produktu
+            productFilter: '',  // filtr dla kodów produktów
+            productDescription: '',  // opis wybranego produktu
+            ordersData: [],  // dane zamówień dla wybranego produktu
+            filteredOrdersData: [],  // dane zamówień dla wybranego produktu po filtrowaniu
+            LensesOrdersColumns: ['Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
+            salesData: [],  // dane sprzedaży dla wybranego produktu
+            filteredSalesData: [],  // dane sprzedaży dla wybranego produktu po filtrowaniu
+            LensesSalesColumns: ['Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
+            selectedStartDate: null,  // wybrana data początkowa
+            selectedEndDate: null,  // wybrana data końcowa
         }
     },
     watch: {
@@ -25,10 +37,29 @@ const app = Vue.createApp({
         },
         selectedTab() {
             this.fetchData()  // Pobierz dane przy zmianie zakładki
-        }
+            if (this.selectedTab === 'lenses') {
+                this.fetchProducts();
+            }
+        },
+        selectedProduct: {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.fetchOrdersData();
+                    this.fetchSalesData();  // pobranie danych o sprzedaży
+                    this.fetchProductDescription();
+                }
+            },
+            immediate: true,
+        },
+        selectedStartDate: function (newVal, oldVal) {
+            this.filterData();
+        },
+        selectedEndDate: function (newVal, oldVal) {
+            this.filterData();
+        },
     },
     created() {
-        this.fetchData()  // Pobierz dane na początku
+        this.fetchData();  // Pobierz dane na początku
     },
     methods: {
         // Metoda do pobierania danych
@@ -61,7 +92,76 @@ const app = Vue.createApp({
                 periodColumn = 'Rok';
             }
             this.orderColumns = [periodColumn, 'BEST (EUR)', 'LAUF (EUR)', 'SWG (PLN)'];
-        }
+        },
+        async fetchProducts() {
+            const url = 'http://localhost:3000/products';
+            try {
+                const response = await axios.get(url);
+                this.products = response.data;
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        async fetchOrdersData() {
+            try {
+                const res = await axios.get(`http://localhost:3000/product-orders/${this.selectedProduct}`);
+                this.ordersData = res.data;
+                this.filterData();
+            } catch (err) {
+                console.error(err);
+                this.ordersData = [];
+            }
+        },
+        formatDate(value) {
+            if (!value) return '-';
+            const date = new Date(value);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');  // JavaScript zwraca miesiące od 0 do 11
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        },
+        formatCurrency(value) {
+            if (!value || isNaN(value)) return '-';
+            const num = parseFloat(value);
+            return num.toLocaleString('pl-PL', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        },
+        async fetchProductDescription() {
+            try {
+                const res = await axios.get(`http://localhost:3000/product-description/${this.selectedProduct}`);
+                this.productDescription = res.data[0].nazwa_towaru;
+            } catch (err) {
+                console.error(err);
+                this.productDescription = '';
+            }
+        },
+        async fetchSalesData() {
+            try {
+                const res = await axios.get(`http://localhost:3000/product-sales/${this.selectedProduct}`);
+                this.salesData = res.data;
+                this.filterData();
+            } catch (err) {
+                console.error(err);
+                this.salesData = [];
+            }
+        },
+        filterData() {
+            if (this.selectedStartDate && this.selectedEndDate) {
+                const startDate = new Date(this.selectedStartDate);
+                const endDate = new Date(this.selectedEndDate);
+
+                this.filteredSalesData = this.salesData.filter(sale => {
+                    const saleDate = new Date(sale.Data);
+                    return saleDate >= startDate && saleDate <= endDate;
+                });
+                this.filteredOrdersData = this.ordersData.filter(order => {
+                    const orderDate = new Date(order.Data);
+                    return orderDate >= startDate && orderDate <= endDate;
+                });
+            } else {
+                this.filteredSalesData = [...this.salesData];  // jeśli daty nie są wybrane, wyświetlamy wszystkie dane
+                this.filteredOrdersData = [...this.ordersData];
+            }
+        },
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn
@@ -106,7 +206,28 @@ const app = Vue.createApp({
                 total[column] = sum.toFixed(2);
             })
             return total;
-        }
+        },
+        // Obliczanie sumy dla kolumny 'Ilość' i 'Wartość' w tabelach zamówień
+        ordersTotal() {
+            const total = { Ilość: 0, Wartość: 0 }
+            this.filteredOrdersData.forEach(row => {
+                total.Ilość += parseFloat(row['Ilość']) || 0;
+                total.Wartość += parseFloat(row['Wartość']) || 0;
+            })
+            return total;
+        },
+        // Obliczanie sumy dla kolumny 'Ilość' i 'Wartość' w tabelach sprzedaży
+        salesTotal() {
+            const total = { Ilość: 0, Wartość: 0 }
+            this.filteredSalesData.forEach(row => {
+                total.Ilość += parseFloat(row['Ilość']) || 0;
+                total.Wartość += parseFloat(row['Wartość']) || 0;
+            })
+            return total;
+        },
+        filteredProducts() {
+            return this.products.filter(product => product.Kod_Towaru.toLowerCase().includes(this.productFilter.toLowerCase()));
+        },
     }
 })
 
