@@ -227,33 +227,19 @@ server.get('/product-description/:code', async (req, res) => {
 server.get('/product-sales/:code', async (req, res) => {
     const code = req.params.code;
     const query = `
-        WITH CTE AS (
-    SELECT
+SELECT
         DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien) As Data,
         elem.TrE_Ilosc As Ilość,
         elem.TrE_WartoscPoRabacie / elem.TrE_Ilosc As Cena,
         elem.TrE_WartoscPoRabacie AS Wartość,
-        elem.TrE_TwrNazwa AS Bestellung,
-        elem.TrE_Twrkod,
-        elem.TrE_KntTyp,
-        ROW_NUMBER() OVER(PARTITION BY elem.TrE_Twrkod, elem.TrE_KntTyp, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien) ORDER BY (SELECT NULL)) as RN
-    FROM cdn.TraElem AS elem
-    LEFT JOIN cdn.TraNag AS nag ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
-    WHERE
-        elem.TrE_Twrkod = '${code}'
-)
-
-SELECT
-    t0.Data,
-    t0.Ilość,
-    t0.Cena,
-    t0.Wartość,
-    t32.Bestellung
-FROM CTE t0
-LEFT JOIN CTE t32 ON t0.Data = t32.Data AND t0.TrE_Twrkod = t32.TrE_Twrkod AND t0.RN = t32.RN AND t32.TrE_KntTyp = 32
-WHERE
-    t0.TrE_KntTyp = 0
-ORDER BY t0.Data DESC
+        elem.TrE_TwrNazwa AS Bestellung
+        FROM cdn.TraElem AS elem
+        LEFT JOIN cdn.TraNag AS nag ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
+        WHERE
+            elem.TrE_Twrkod = '${code}'
+          AND
+            elem.TrE_KntTyp = 32
+        ORDER BY data DESC
     `;
 
     try {
