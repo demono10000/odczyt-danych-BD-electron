@@ -28,9 +28,24 @@ const config = {
         trustServerCertificate: true
     }
 }
-
+const configSOD = {
+    user: secret.database.user,
+    password: secret.database.password,
+    server: secret.database.server,
+    database: secret.database.databaseSOD,
+    options: {
+        encrypt: true,
+        trustServerCertificate: true
+    }
+}
 // Nawiązanie połączenia z bazą danych
-sql.connect(config).catch(err => console.error('initial connection error', err))
+// sql.connect(config).catch(err => console.error('initial connection error', err))
+const pool = new sql.ConnectionPool(config);
+pool.connect().catch(err => console.error('initial connection error', err))
+
+// Nawiązanie połączenia z drugą bazą danych
+const poolSOD = new sql.ConnectionPool(configSOD);
+poolSOD.connect().catch(err => console.error('initial connection error', err))
 server.use(cors()) // Użycie modułu CORS dla poprawnej komunikacji między serwerem a klientem
 
 // Obsługa zapytań GET do serwera, ścieżka '/data/:year/:type'
@@ -83,7 +98,7 @@ server.get('/data/:year/:type', async (req, res) => {
         return;
     }
     try {
-        const result = await sql.query(query)
+        const result = await pool.query(query)
         res.json(result.recordset)
     } catch (err) {
         console.error(err)
@@ -143,7 +158,7 @@ server.get('/orders/:year/:type', async (req, res) => {
         return;
     }
     try {
-        const result = await sql.query(query)
+        const result = await pool.query(query)
         res.json(result.recordset)
     } catch (err) {
         console.error(err)
@@ -167,7 +182,7 @@ server.get('/products', async (req, res) => {
     `;
 
     try {
-        const result = await sql.query(query);
+        const result = await pool.query(query);
         res.json(result.recordset);
     } catch (err) {
         console.error(err);
@@ -197,7 +212,7 @@ server.get('/product-orders/:code', async (req, res) => {
     `;
 
     try {
-        const result = await sql.query(query);
+        const result = await pool.query(query);
         res.json(result.recordset);
     } catch (err) {
         console.error(err);
@@ -216,7 +231,7 @@ server.get('/product-description/:code', async (req, res) => {
     `;
 
     try {
-        const result = await sql.query(query);
+        const result = await pool.query(query);
         res.json(result.recordset);
     } catch (err) {
         console.error(err);
@@ -243,14 +258,31 @@ SELECT
     `;
 
     try {
-        const result = await sql.query(query);
+        const result = await pool.query(query);
         res.json(result.recordset);
     } catch (err) {
         console.error(err);
         res.status(500).send(err.message);
     }
 });
+// soczewki - sod - opis
+server.get('/sod-opis/:code', async (req, res) => {
+    const code = req.params.code;
+    const query = `
+        SELECT OPIS AS Opis
+        FROM SPRAWA
+        WHERE OPIS is not null
+        AND NAZWA LIKE '%${code}%'
+    `;
 
+    try {
+        const result = await poolSOD.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
 // Uruchomienie serwera
 server.listen(port, () => console.log(`Server listening at http://localhost:${port}`))
 

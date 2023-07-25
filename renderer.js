@@ -16,6 +16,7 @@ const app = Vue.createApp({
             selectedProduct: null,  // wybrany kod produktu
             productFilter: '',  // filtr dla kodów produktów
             productDescription: '',  // opis wybranego produktu
+            productDescriptionSOD: '',  // opis wybranego produktu z sod
             ordersData: [],  // dane zamówień dla wybranego produktu
             filteredOrdersData: [],  // dane zamówień dla wybranego produktu po filtrowaniu
             LensesOrdersColumns: ['Bestellung', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
@@ -47,6 +48,7 @@ const app = Vue.createApp({
                     this.fetchOrdersData();
                     this.fetchSalesData();  // pobranie danych o sprzedaży
                     this.fetchProductDescription();
+                    this.fetchProductDescriptionSOD();
                 }
             },
             immediate: true,
@@ -132,6 +134,15 @@ const app = Vue.createApp({
             } catch (err) {
                 console.error(err);
                 this.productDescription = '';
+            }
+        },
+        async fetchProductDescriptionSOD() {
+            try {
+                const res = await axios.get(`http://localhost:3000/sod-opis/${this.selectedProduct}`);
+                this.productDescriptionSOD = res.data[0].Opis.replace(/\n/g, '<br>');
+            } catch (err) {
+                console.error(err);
+                this.productDescriptionSOD = '';
             }
         },
         async fetchSalesData() {

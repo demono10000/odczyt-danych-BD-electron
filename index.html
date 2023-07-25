@@ -95,6 +95,25 @@
             box-sizing: border-box;
             font-size: 16px;
         }
+        .filter-panel, .description-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 50%;
+        }
+
+        .description-panel {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: fit-content;
+            word-break: break-all;
+        }
+
+        .panel-container {
+            display: flex;
+            gap: 10px;
+        }
     </style>
 
 </head>
@@ -139,17 +158,23 @@
         </table>
     </div>
     <div v-show="selectedTab === 'lenses'">
-        <div class="filter-panel">
-            <!-- Kontrolki do wyboru kodu towaru -->
-            <label for="product">Wybierz towar: </label>
-            <select id="product" v-model="selectedProduct">
-                <option v-for="product in filteredProducts" :value="product.Kod_Towaru" :key="product.Kod_Towaru">{{ product.Kod_Towaru }}</option>
-            </select>
-            <input type="text" v-model="productFilter" placeholder="Filtruj towary..." />
-            <label for="startDate">Data początkowa: </label>
-            <input type="date" id="startDate" v-model="selectedStartDate">
-            <label for="endDate">Data końcowa: </label>
-            <input type="date" id="endDate" v-model="selectedEndDate">
+        <div class="panel-container">
+            <div class="filter-panel">
+                <!-- Kontrolki do wyboru kodu towaru -->
+                <label for="product">Wybierz towar: </label>
+                <select id="product" v-model="selectedProduct">
+                    <option v-for="product in filteredProducts" :value="product.Kod_Towaru" :key="product.Kod_Towaru">{{ product.Kod_Towaru }}</option>
+                </select>
+                <input type="text" v-model="productFilter" placeholder="Filtruj towary..." />
+                <label for="startDate">Data początkowa: </label>
+                <input type="date" id="startDate" v-model="selectedStartDate">
+                <label for="endDate">Data końcowa: </label>
+                <input type="date" id="endDate" v-model="selectedEndDate">
+            </div>
+            <div class="description-panel">
+                <h2>Opis produktu</h2>
+                <p v-html="productDescriptionSOD"></p> <!-- użyj dyrektywy v-html -->
+            </div>
         </div>
         <!-- Wyświetlanie opisu towaru -->
         <p>{{ productDescription }}</p>
