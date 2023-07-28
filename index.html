@@ -106,13 +106,36 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            height: fit-content;
             word-break: break-all;
+            overflow-y: scroll; /* Dodajemy suwak */
+            height: 35vh; /* Ustalamy maksymalną wysokość okna */
+            width: 100%; /* Aby zająć całą dostępną szerokość */
         }
 
         .panel-container {
             display: flex;
             gap: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin-bottom: 10px;
+            background-color: #f2f2f2;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        ul li a:hover {
+            color: #4CAF50;
         }
     </style>
 
@@ -173,7 +196,15 @@
             </div>
             <div class="description-panel">
                 <h2>Opis produktu</h2>
-                <p v-html="productDescriptionSOD"></p> <!-- użyj dyrektywy v-html -->
+                <p v-html="productDescriptionSOD"></p>
+                <h3>Dostępne pliki</h3>
+                <ul>
+                    <li v-for="file in availableFiles" :key="file.NUMER">
+                        <a :href="'http://localhost:3000/file/' + file.NUMER" target="_blank">
+                            {{ file.PLIK }} ({{ formatDate(file.PLIKDATA) }})
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
         <!-- Wyświetlanie opisu towaru -->
@@ -239,6 +270,13 @@
 <!-- Biblioteki skryptów -->
 <script src="https://unpkg.com/vue@next"></script>  <!-- Vue.js -->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>  <!-- Axios.js -->
+<!-- import style -->
+<link type="text/css" rel="stylesheet" href="https://unpkg.com/vue-next-select/dist/index.min.css" />
+
+<!-- import script -->
+<script src="https://unpkg.com/vue-next-select/dist/vue-next-select.iife.prod.js"></script>
 <script src="renderer.js"></script>  <!-- Główny skrypt -->
+
+
 </body>
 </html>

@@ -1,7 +1,7 @@
 // main.js
 /**
  * Autor: Paweł Sołtys
- * Data: 2023-07-24
+ * Data: 2023-07-28
  */
 
 // Importowanie modułów node.js
@@ -10,6 +10,7 @@ const express = require('express')
 const sql = require('mssql')
 const path = require('path');
 const cors = require('cors')
+const zlib = require('zlib');
 
 // Stworzenie serwera Express.js na porcie 3000
 const server = express()
@@ -38,6 +39,16 @@ const configSOD = {
         trustServerCertificate: true
     }
 }
+const configSODImages = {
+    user: secret.database.user,
+    password: secret.database.password,
+    server: secret.database.server,
+    database: secret.database.databaseSODImages,
+    options: {
+        encrypt: true,
+        trustServerCertificate: true
+    }
+}
 // Nawiązanie połączenia z bazą danych
 // sql.connect(config).catch(err => console.error('initial connection error', err))
 const pool = new sql.ConnectionPool(config);
@@ -46,6 +57,8 @@ pool.connect().catch(err => console.error('initial connection error', err))
 // Nawiązanie połączenia z drugą bazą danych
 const poolSOD = new sql.ConnectionPool(configSOD);
 poolSOD.connect().catch(err => console.error('initial connection error', err))
+const poolSODImages = new sql.ConnectionPool(configSODImages);
+poolSODImages.connect().catch(err => console.error('initial connection error', err))
 server.use(cors()) // Użycie modułu CORS dla poprawnej komunikacji między serwerem a klientem
 
 // Obsługa zapytań GET do serwera, ścieżka '/data/:year/:type'
@@ -283,6 +296,91 @@ server.get('/sod-opis/:code', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+// odczyt obrazu z bazy danych SOD
+server.get('/file/:id', async (req, res) => {
+    const id = req.params.id;
+    const query = `SELECT TRESC AS Tresc, PLIK AS Plik
+        FROM DOKTRESC
+        WHERE NUMER = '${id}'`;
+    try {
+        const result = await poolSODImages.query(query);
+        if (result.recordset.length > 0) {
+            const compressedData = result.recordset[0].Tresc;
+            const fileName = result.recordset[0].Plik;
+            const extension = path.extname(fileName).toLowerCase();
+            let contentType = '';
+            switch (extension) {
+                case '.jpg':
+                case '.jpeg':
+                    contentType = 'image/jpeg';
+                    break;
+                case '.pdf':
+                    contentType = 'application/pdf';
+                    break;
+                case '.docx':
+                    contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                    break;
+                case '.png':
+                    contentType = 'image/png';
+                    break;
+                default:
+                    res.status(400).send('Unsupported file format');
+                    return;
+            }
+            zlib.gunzip(compressedData, (err, decompressedData) => {
+                if (err) {
+                    console.error(err);
+                    res.status(500).send(err.message);
+                } else {
+                    res.set('Content-Type', contentType);
+                    res.send(decompressedData);
+                }
+            });
+        } else {
+            res.status(404).send('Not found');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+server.get('/available-files/:lens', async (req, res) => {
+    const lens = req.params.lens;
+    try {
+        const request = new sql.Request(poolSOD);
+
+        // Query to fetch documents for the selected lens from 'pool' database
+        const docResult = await request
+            .input('lens', sql.NVarChar, lens)
+            .query(`
+                SELECT DISTINCT D.DOKUMENT
+                FROM SPRAWA S
+                LEFT JOIN DOKUMENT D on S.NUMER = D.SPRAWA
+                WHERE S.NAZWA LIKE '%' + @lens + '%' AND D.DOKUMENT is not null
+            `);
+        const documents = docResult.recordset;
+
+        let availableFiles = [];
+        for (let document of documents) {
+            const documentString = document.DOKUMENT.toString();
+            const requestSOD = new sql.Request(poolSODImages);
+            const fileResult = await requestSOD
+                .input('document', sql.NVarChar, documentString)
+                .query(`
+            SELECT PLIK, NUMER, PLIKDATA
+            FROM DOKTRESC
+            WHERE DOKUMENT = @document
+        `);
+            availableFiles.push(...fileResult.recordset);
+        }
+
+        res.json(availableFiles);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+
 // Uruchomienie serwera
 server.listen(port, () => console.log(`Server listening at http://localhost:${port}`))
 

@@ -25,6 +25,7 @@ const app = Vue.createApp({
             LensesSalesColumns: ['Bestellung', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
             selectedStartDate: null,  // wybrana data początkowa
             selectedEndDate: null,  // wybrana data końcowa
+            availableFiles: [],  // lista dostępnych plików
         }
     },
     watch: {
@@ -49,6 +50,7 @@ const app = Vue.createApp({
                     this.fetchSalesData();  // pobranie danych o sprzedaży
                     this.fetchProductDescription();
                     this.fetchProductDescriptionSOD();
+                    this.fetchAvailableFiles();
                 }
             },
             immediate: true,
@@ -171,6 +173,15 @@ const app = Vue.createApp({
             } else {
                 this.filteredSalesData = [...this.salesData];  // jeśli daty nie są wybrane, wyświetlamy wszystkie dane
                 this.filteredOrdersData = [...this.ordersData];
+            }
+        },
+        async fetchAvailableFiles() {
+            try {
+                const res = await axios.get(`http://localhost:3000/available-files/${this.selectedProduct}`);
+                this.availableFiles = res.data;
+            } catch (err) {
+                console.error(err);
+                this.availableFiles = [];
             }
         },
     },
