@@ -19,10 +19,10 @@ const app = Vue.createApp({
             productDescriptionSOD: '',  // opis wybranego produktu z sod
             ordersData: [],  // dane zamówień dla wybranego produktu
             filteredOrdersData: [],  // dane zamówień dla wybranego produktu po filtrowaniu
-            LensesOrdersColumns: ['Bestellung', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
+            LensesOrdersColumns: ['Bestellung', 'Klient', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
             salesData: [],  // dane sprzedaży dla wybranego produktu
             filteredSalesData: [],  // dane sprzedaży dla wybranego produktu po filtrowaniu
-            LensesSalesColumns: ['Bestellung', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
+            LensesSalesColumns: ['Bestellung', 'Klient', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
             selectedStartDate: null,  // wybrana data początkowa
             selectedEndDate: null,  // wybrana data końcowa
             availableFiles: [],  // lista dostępnych plików
@@ -242,6 +242,11 @@ const app = Vue.createApp({
             this.fetchOrdersData();
             this.fetchAvailableFiles();
         },
+        showClient(client) {
+            this.selectedClient = client;
+            this.selectedTab = 'client';
+            this.fetchClientTransactionsData();
+        }
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn

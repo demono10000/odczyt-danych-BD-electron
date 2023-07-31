@@ -216,10 +216,12 @@ server.get('/product-orders/:code', async (req, res) => {
             THEN 'PRAWDA'
             ELSE 'FAŁSZ'
         END AS zakończone,
-        nag.ZaN_DokumentObcy AS Bestellung
+        nag.ZaN_DokumentObcy AS Bestellung,
+        atr.Atr_Wartosc AS Klient
         FROM cdn.ZamElem AS elem
         LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
         LEFT JOIN cdn.TraElem As traelem ON elem.ZaE_TwrKod = traelem.TrE_TwrNazwa AND nag.ZaN_DokumentObcy = traelem.TrE_TwrNazwa
+        LEFT JOIN cdn.atrybuty AS atr ON nag.ZaN_GIDNumer = atr.Atr_ObiNumer AND atr.Atr_AtkId = 18
         WHERE elem.ZaE_Twrkod = '${code}'
         ORDER BY data DESC
     `;
@@ -255,19 +257,21 @@ server.get('/product-description/:code', async (req, res) => {
 server.get('/product-sales/:code', async (req, res) => {
     const code = req.params.code;
     const query = `
-SELECT
+        SELECT
         DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien) As Data,
         elem.TrE_Ilosc As Ilość,
         elem.TrE_WartoscPoRabacie / elem.TrE_Ilosc As Cena,
         elem.TrE_WartoscPoRabacie AS Wartość,
-        elem.TrE_TwrNazwa AS Bestellung
-        FROM cdn.TraElem AS elem
-        LEFT JOIN cdn.TraNag AS nag ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
-        WHERE
-            elem.TrE_Twrkod = '${code}'
-          AND
-            elem.TrE_KntTyp = 32
-        ORDER BY data DESC
+        elem.TrE_TwrNazwa AS Bestellung,
+        atr.Atr_Wartosc AS Klient
+    FROM cdn.TraElem AS elem
+    LEFT JOIN cdn.TraNag AS nag ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
+    LEFT JOIN cdn.atrybuty AS atr ON nag.TrN_GIDNumer = atr.Atr_ObiNumer AND atr.Atr_AtkId = 18
+    WHERE
+        elem.TrE_Twrkod = '${code}'
+    AND
+        elem.TrE_KntTyp = 32
+    ORDER BY Data DESC
     `;
 
     try {

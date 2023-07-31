@@ -228,6 +228,7 @@
                 <tbody>
                 <tr v-for="row in filteredOrdersData" :key="row.orderId" :class="{ 'order-completed': row.zakończone === 'PRAWDA' }">
                     <td>{{ row['Bestellung'] || '-' }}</td>
+                    <td class="clickable" @click="showClient(row['Klient'])">{{ row['Klient'] || '-' }}</td>
                     <td>{{ formatDate(row['Data']) || '-' }}</td>
                     <td>{{ row['Ilość'] || '-' }}</td>
                     <td>{{ formatCurrency(row['Cena']) || '-' }}</td>
@@ -236,6 +237,7 @@
                 <!-- Wyświetlanie sumy -->
                 <tr class="total">
                     <td>Suma</td>
+                    <td>-</td>
                     <td>-</td>
                     <td>{{ formatNumber(ordersTotal.Ilość) || '-' }}</td>
                     <td>-</td>
@@ -256,6 +258,7 @@
                 <tbody>
                 <tr v-for="row in filteredSalesData" :key="row.Data">
                     <td>{{ row['Bestellung'] || '-' }}</td>
+                    <td class="clickable" @click="showClient(row['Klient'])">{{ row['Klient'] || '-' }}</td>
                     <td>{{ formatDate(row.Data) }}</td>
                     <td>{{ row.Ilość }}</td>
                     <td>{{ formatCurrency(row.Cena) }}</td>
@@ -264,6 +267,7 @@
                 <!-- Wyświetlanie sumy -->
                 <tr class="total">
                     <td>Suma</td>
+                    <td>-</td>
                     <td>-</td>
                     <td>{{ formatNumber(salesTotal.Ilość) || '-' }}</td>
                     <td>-</td>
