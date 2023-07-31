@@ -1,7 +1,7 @@
 // main.js
 /**
  * Autor: Paweł Sołtys
- * Data: 2023-07-28
+ * Data: 2023-07-31
  */
 
 // Importowanie modułów node.js
@@ -374,12 +374,89 @@ server.get('/available-files/:lens', async (req, res) => {
             availableFiles.push(...fileResult.recordset);
         }
 
+        // Sort files from newest to oldest
+        availableFiles.sort((a, b) => new Date(b.PLIKDATA) - new Date(a.PLIKDATA));
+
         res.json(availableFiles);
     } catch (err) {
         console.error(err);
         res.status(500).send(err.message);
     }
 });
+// Obsługa zapytań GET do serwera, ścieżka '/customers'
+server.get('/customers', async (req, res) => {
+    const query = `
+        SELECT DISTINCT a.Atr_Wartosc
+        FROM cdn.Atrybuty a
+        WHERE a.Atr_AtkId = 18
+        ORDER BY a.Atr_Wartosc
+    `;
+
+    try {
+        const result = await pool.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+// transakcje klienta
+server.get('/customer-transactions/:client', async (req, res) => {
+    const client = req.params.client;
+    const startDate = req.query.startDate || null;
+    const endDate = req.query.endDate || null;
+
+    const request = new sql.Request(pool);
+    request.input('client', sql.NVarChar, client);
+
+    const baseQuery  = `
+WITH ranked_rows AS (
+  SELECT
+    a.ZaE_TwrKod AS Kod_Towaru,
+    TrE_Ilosc AS Wyslane,
+    ZaE_Ilosc AS Zamowione,
+    ZaN_DokumentObcy AS Bestellung,
+    ROW_NUMBER() OVER(PARTITION BY ZaN_DokumentObcy ORDER BY TrE_Ilosc DESC) AS rn,
+    DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01') As Data
+  FROM
+    cdn.zamelem a
+    INNER JOIN cdn.zamnag b ON b.ZaN_GIDNumer=a.ZaE_GIDNumer
+    LEFT JOIN cdn.TraElem c ON c.TrE_TwrKod=a.ZaE_TwrKod AND b.Zan_DokumentObcy = c.TrE_TwrNazwa
+    LEFT JOIN cdn.traNag d ON d.TrN_GIDTyp=c.TrE_GIDTyp AND d.TrN_GIDNumer=c.TrE_GIDNumer
+    LEFT JOIN cdn.KntAdresy e ON e.KnA_GIDNumer= a.ZaE_KntNumer
+    LEFT JOIN cdn.atrybuty f ON b.ZaN_GIDNumer=f.Atr_ObiNumer
+  WHERE f.Atr_AtkId = 18 AND f.Atr_Wartosc = @client
+)
+SELECT
+            Kod_Towaru,
+            SUM(Wyslane) AS Wysłane,
+            SUM(
+            CASE
+                WHEN rn = 1 THEN Zamowione
+                ELSE 0
+            END) AS Zamówione
+        FROM ranked_rows
+    `;
+    let finalQuery = baseQuery;
+    if(startDate && endDate) {
+        finalQuery += ` WHERE Data BETWEEN @startDate AND @endDate`;
+        request.input('startDate', sql.Date, new Date(startDate));
+        request.input('endDate', sql.Date, new Date(endDate));
+    }
+
+    finalQuery += ` GROUP BY Kod_Towaru`;
+
+    try {
+        const result = await request.query(finalQuery);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+
+
+
 
 // Uruchomienie serwera
 server.listen(port, () => console.log(`Server listening at http://localhost:${port}`))

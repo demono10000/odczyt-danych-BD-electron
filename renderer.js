@@ -26,6 +26,11 @@ const app = Vue.createApp({
             selectedStartDate: null,  // wybrana data początkowa
             selectedEndDate: null,  // wybrana data końcowa
             availableFiles: [],  // lista dostępnych plików
+            clients: [],  // lista klientów
+            selectedClient: null,  // wybrany klient
+            clientFilter: '',  // filtr dla klientów
+            clientTransactions: [],  // transakcje klienta
+            clientTransactionsColumns: ['Kod_Towaru', 'Zamówione', 'Wysłane'],  // kolumny dla tabeli transakcji klienta
         }
     },
     watch: {
@@ -41,6 +46,8 @@ const app = Vue.createApp({
             this.fetchData()  // Pobierz dane przy zmianie zakładki
             if (this.selectedTab === 'lenses') {
                 this.fetchProducts();
+            }else if (this.selectedTab === 'client') {
+                this.fetchClients();
             }
         },
         selectedProduct: {
@@ -57,10 +64,27 @@ const app = Vue.createApp({
         },
         selectedStartDate: function (newVal, oldVal) {
             this.filterData();
+            if (this.selectedTab === 'client') {
+                if (this.selectedStartDate && this.selectedEndDate) {
+                    this.fetchClientTransactionsData();
+                }
+            }
         },
         selectedEndDate: function (newVal, oldVal) {
             this.filterData();
+            if (this.selectedTab === 'client') {
+                if (this.selectedStartDate && this.selectedEndDate) {
+                    this.fetchClientTransactionsData();
+                }
+            }
         },
+        selectedClient: {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.fetchClientTransactionsData();
+                }
+            }
+        }
     },
     created() {
         this.fetchData();  // Pobierz dane na początku
@@ -184,6 +208,40 @@ const app = Vue.createApp({
                 this.availableFiles = [];
             }
         },
+        async fetchClients() {
+            const url = 'http://localhost:3000/customers';
+            try {
+                const response = await axios.get(url);
+                this.clients = response.data;
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        async fetchClientTransactionsData() {
+            try {
+                const params = {};
+                if (this.selectedStartDate && this.selectedEndDate) {
+                    params.startDate = this.selectedStartDate;
+                    params.endDate = this.selectedEndDate;
+                }
+                const res = await axios.get(`http://localhost:3000/customer-transactions/${this.selectedClient}`, {
+                    params: params
+                });
+                this.clientTransactions = res.data;
+            } catch (err) {
+                console.error(err);
+                this.clientTransactions = [];
+            }
+        },
+        showLens(kodTowaru) {
+            this.selectedProduct = kodTowaru;
+            this.selectedTab = 'lenses';
+            this.fetchProductDescription();
+            this.fetchProductDescriptionSOD();
+            this.fetchSalesData();
+            this.fetchOrdersData();
+            this.fetchAvailableFiles();
+        },
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn
@@ -247,9 +305,20 @@ const app = Vue.createApp({
             })
             return total;
         },
+        clientTransactionsTotal() {
+            const total = { Zamówione: 0, Wysłane: 0 }
+            this.clientTransactions.forEach(row => {
+                total.Zamówione += parseFloat(row['Zamówione']) || 0;
+                total.Wysłane += parseFloat(row['Wysłane']) || 0;
+            })
+            return total;
+        },
         filteredProducts() {
             return this.products.filter(product => product.Kod_Towaru.toLowerCase().includes(this.productFilter.toLowerCase()));
         },
+        filteredClients() {
+            return this.clients.filter(client => client.Atr_Wartosc.toLowerCase().includes(this.clientFilter.toLowerCase()));
+        }
     }
 })
 

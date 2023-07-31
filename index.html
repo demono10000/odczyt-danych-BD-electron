@@ -137,6 +137,12 @@
         ul li a:hover {
             color: #4CAF50;
         }
+
+        .clickable {
+            cursor: pointer;
+            text-decoration: underline;
+            color: blue;
+        }
     </style>
 
 </head>
@@ -147,6 +153,7 @@
         <button v-bind:class="{ active: selectedTab === 'sales' }" v-on:click="selectedTab = 'sales'">Sprzedaż</button>
         <button v-bind:class="{ active: selectedTab === 'orders' }" v-on:click="selectedTab = 'orders'">Zamówienia</button>
         <button v-bind:class="{ active: selectedTab === 'lenses' }" v-on:click="selectedTab = 'lenses'">Soczewki</button>
+        <button v-bind:class="{ active: selectedTab === 'client' }" v-on:click="selectedTab = 'client'">Klient</button>
     </div>
     <div v-show="selectedTab === 'sales' || selectedTab === 'orders'">
         <div>
@@ -266,15 +273,45 @@
             </table>
         </div>
     </div>
+    <div v-show="selectedTab === 'client'">
+        <div class="panel-container">
+            <div class="filter-panel">
+                <label for="client">Wybierz klienta: </label>
+                <select id="client" v-model="selectedClient">
+                    <option v-for="client in filteredClients" :value="client.Atr_Wartosc" :key="client.Atr_Wartosc">{{ client.Atr_Wartosc }}</option>
+                </select>
+                <input type="text" v-model="clientFilter" placeholder="Filtruj klientów..." />
+                <label for="startDate">Data początkowa: </label>
+                <input type="date" id="startDate" v-model="selectedStartDate">
+                <label for="endDate">Data końcowa: </label>
+                <input type="date" id="endDate" v-model="selectedEndDate">
+            </div>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th v-for="column in clientTransactionsColumns" :key="column">{{ column }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="row in clientTransactions" :key="row.Kod_Towaru">
+                <td class="clickable" @click="showLens(row['Kod_Towaru'])">{{ row['Kod_Towaru'] || '-' }}</td>
+                <td>{{ row['Zamówione'] || '-' }}</td>
+                <td>{{ row['Wysłane'] || '-' }}</td>
+            </tr>
+            <!-- Wyświetlanie sumy -->
+            <tr class="total">
+                <td>Suma</td>
+                <td>{{ formatNumber(clientTransactionsTotal.Zamówione) || '-' }}</td>
+                <td>{{ formatNumber(clientTransactionsTotal.Wysłane) || '-' }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 <!-- Biblioteki skryptów -->
 <script src="https://unpkg.com/vue@next"></script>  <!-- Vue.js -->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>  <!-- Axios.js -->
-<!-- import style -->
-<link type="text/css" rel="stylesheet" href="https://unpkg.com/vue-next-select/dist/index.min.css" />
-
-<!-- import script -->
-<script src="https://unpkg.com/vue-next-select/dist/vue-next-select.iife.prod.js"></script>
 <script src="renderer.js"></script>  <!-- Główny skrypt -->
 
 
