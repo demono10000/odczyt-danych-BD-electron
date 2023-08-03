@@ -31,6 +31,10 @@ const app = Vue.createApp({
             clientFilter: '',  // filtr dla klientów
             clientTransactions: [],  // transakcje klienta
             clientTransactionsColumns: ['Kod_Towaru', 'Zamówione', 'Wysłane'],  // kolumny dla tabeli transakcji klienta
+            sort: {
+                column: null,
+                ascending: true
+            }, // sortowanie
         }
     },
     watch: {
@@ -58,6 +62,7 @@ const app = Vue.createApp({
                     this.fetchProductDescription();
                     this.fetchProductDescriptionSOD();
                     this.fetchAvailableFiles();
+                    this.sort.column = null;
                 }
             },
             immediate: true,
@@ -82,6 +87,7 @@ const app = Vue.createApp({
             handler(newVal, oldVal) {
                 if (newVal !== oldVal) {
                     this.fetchClientTransactionsData();
+                    this.sort.column = null;
                 }
             }
         }
@@ -228,6 +234,7 @@ const app = Vue.createApp({
                     params: params
                 });
                 this.clientTransactions = res.data;
+                this.sort.column = null;
             } catch (err) {
                 console.error(err);
                 this.clientTransactions = [];
@@ -246,6 +253,58 @@ const app = Vue.createApp({
             this.selectedClient = client;
             this.selectedTab = 'client';
             this.fetchClientTransactionsData();
+        },
+        sortByColumn(column, table) {
+            // Przełączanie trybu sortowania
+            if (this.sort.column === column) {
+                this.sort.ascending = !this.sort.ascending;
+            } else {
+                this.sort.column = column;
+                this.sort.ascending = true;
+            }
+            // Sortowanie tablicy
+            if (table === 'client') {
+                this.sortTable(this.clientTransactions, column)
+            } else if (table === 'lenses') {
+                this.sortTable(this.filteredOrdersData, column)
+                this.sortTable(this.filteredSalesData, column)
+            } else if (table === 'orders') {
+                this.sortTable(this.transformedData, column)
+            } else if (table === 'sales') {
+                this.sortTable(this.transformedData, column)
+            }
+        },
+        sortTable(data, column) {
+            isMonth = column === 'Miesiąc';
+            isWeek = column === 'Tydzień';
+            if (column === 'Miesiąc' || column === 'Tydzień' || column === 'Rok') {
+                column = 'period';
+            }
+            data.sort((a, b) => {
+                const valueA = a[column] || '0';
+                const valueB = b[column] || '0';
+
+                if (isMonth) {
+                    const indexA = this.months.indexOf(valueA);
+                    const indexB = this.months.indexOf(valueB);
+                    return this.sort.ascending ? indexA - indexB : indexB - indexA;
+                } else if (isWeek) {
+                    const weekNumA = parseInt(valueA.split(' ')[1]) || 0;
+                    const weekNumB = parseInt(valueB.split(' ')[1]) || 0;
+                    return this.sort.ascending ? weekNumA - weekNumB : weekNumB - weekNumA;
+                }
+
+                // Próbuj zamienić na liczbę; jeśli się nie uda, użyj oryginalnej wartości
+                const numA = isNaN(parseFloat(valueA)) ? valueA : parseFloat(valueA);
+                const numB = isNaN(parseFloat(valueB)) ? valueB : parseFloat(valueB);
+
+                // Porównaj jako liczby, jeśli obie wartości są liczbami; w przeciwnym razie porównaj jako ciągi znaków
+                if (typeof numA === 'number' && typeof numB === 'number') {
+                    return this.sort.ascending ? numA - numB : numB - numA;
+                } else {
+                    return this.sort.ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+                }
+            });
         }
     },
     computed: {
@@ -259,9 +318,9 @@ const app = Vue.createApp({
             this.data.forEach(item => {
                 let periodKey;
                 if (this.selectedType === 'monthly') {
-                    periodKey = this.months[item.Miesiac - 1];
+                    periodKey = this.months[item.Miesiąc - 1];
                 } else if (this.selectedType === 'weekly') {
-                    periodKey = 'Tydzień ' + item.Tydzien;
+                    periodKey = 'Tydzień ' + item.Tydzień;
                 } else if (this.selectedType === 'yearly') {
                     periodKey = item.Rok;
                 }
@@ -279,8 +338,6 @@ const app = Vue.createApp({
                 // sortowanie danych rocznych w kolejności malejącej
                 result.sort((a, b) => b.period - a.period);
             }
-
-            console.log(result)
             return result;
         },
         // Obliczenie sumy dla każdej kolumny

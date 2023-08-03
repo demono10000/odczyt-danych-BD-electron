@@ -143,6 +143,13 @@
             text-decoration: underline;
             color: blue;
         }
+        th span {
+            color: #1E1E1E; /* Kolor wskaźnika */
+            margin-left: 5px; /* Odstęp od nazwy kolumny */
+        }
+        th span span:first-child {
+            margin-right: 3px; /* Odstęp między strzałkami */
+        }
     </style>
 
 </head>
@@ -171,10 +178,30 @@
         </div>
         <table>
             <!-- Wyświetlanie odpowiednich kolumn w zależności od wybranej zakładki -->
-            <tr>
-                <th v-if="selectedTab === 'sales'" v-for="column in columns" :key="column">{{ column }}</th>
-                <th v-if="selectedTab === 'orders'" v-for="column in orderColumns" :key="column">{{ column }}</th>
-            </tr>
+            <thead>
+                <tr>
+                    <th v-if="selectedTab === 'sales'" v-for="column in columns" :key="column" @click="sortByColumn(column, 'sales')">
+                        {{ column }}
+                        <span v-if="sort.column === column">
+                            <span v-if="sort.ascending">↑</span>
+                            <span v-else>↓</span>
+                        </span>
+                        <span v-else>
+                            <span>↑</span><span>↓</span>
+                        </span>
+                    </th>
+                    <th v-if="selectedTab === 'orders'" v-for="column in orderColumns" :key="column" @click="sortByColumn(column, 'orders')">
+                        {{ column }}
+                        <span v-if="sort.column === column">
+                            <span v-if="sort.ascending">↑</span>
+                            <span v-else>↓</span>
+                        </span>
+                        <span v-else>
+                            <span>↑</span><span>↓</span>
+                        </span>
+                    </th>
+                </tr>
+            </thead>
             <!-- Wyświetlanie danych z transformowanej tabeli -->
             <tr v-for="row in transformedData" :key="row.period">
                 <td>{{ row.period || '-' }}</td>
@@ -222,11 +249,20 @@
             <table>
                 <thead>
                 <tr>
-                    <th v-for="column in LensesOrdersColumns" :key="column">{{ column }}</th>
+                    <th v-for="column in LensesOrdersColumns" :key="column" @click="sortByColumn(column, 'lenses')">
+                        {{ column }}
+                        <span v-if="sort.column === column">
+                            <span v-if="sort.ascending">↑</span>
+                            <span v-else>↓</span>
+                         </span>
+                        <span v-else>
+                            <span>↑</span><span>↓</span>
+                        </span>
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="row in filteredOrdersData" :key="row.orderId" :class="{ 'order-completed': row.zakończone === 'PRAWDA' }">
+                <tr v-for="row in filteredOrdersData" :class="{ 'order-completed': row.zakończone === 'PRAWDA' }">
                     <td>{{ row['Bestellung'] || '-' }}</td>
                     <td class="clickable" @click="showClient(row['Klient'])">{{ row['Klient'] || '-' }}</td>
                     <td>{{ formatDate(row['Data']) || '-' }}</td>
@@ -252,11 +288,20 @@
             <table>
                 <thead>
                 <tr>
-                    <th v-for="column in LensesSalesColumns" :key="column">{{ column }}</th>
+                    <th v-for="column in LensesSalesColumns" :key="column" @click="sortByColumn(column, 'lenses')">
+                        {{ column }}
+                        <span v-if="sort.column === column">
+                            <span v-if="sort.ascending">↑</span>
+                            <span v-else>↓</span>
+                         </span>
+                        <span v-else>
+                            <span>↑</span><span>↓</span>
+                        </span>
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="row in filteredSalesData" :key="row.Data">
+                <tr v-for="row in filteredSalesData">
                     <td>{{ row['Bestellung'] || '-' }}</td>
                     <td class="clickable" @click="showClient(row['Klient'])">{{ row['Klient'] || '-' }}</td>
                     <td>{{ formatDate(row.Data) }}</td>
@@ -293,9 +338,18 @@
         </div>
         <table>
             <thead>
-            <tr>
-                <th v-for="column in clientTransactionsColumns" :key="column">{{ column }}</th>
-            </tr>
+                <tr>
+                    <th v-for="column in clientTransactionsColumns" :key="column" @click="sortByColumn(column, 'client')">
+                        {{ column }}
+                        <span v-if="sort.column === column">
+                            <span v-if="sort.ascending">↑</span>
+                            <span v-else>↓</span>
+                         </span>
+                        <span v-else>
+                            <span>↑</span><span>↓</span>
+                        </span>
+                    </th>
+                </tr>
             </thead>
             <tbody>
             <tr v-for="row in clientTransactions" :key="row.Kod_Towaru">

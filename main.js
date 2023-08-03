@@ -61,7 +61,7 @@ const poolSODImages = new sql.ConnectionPool(configSODImages);
 poolSODImages.connect().catch(err => console.error('initial connection error', err))
 server.use(cors()) // Użycie modułu CORS dla poprawnej komunikacji między serwerem a klientem
 
-// Obsługa zapytań GET do serwera, ścieżka '/data/:year/:type'
+// Sprzedaż
 server.get('/data/:year/:type', async (req, res) => {
     const year = req.params.year;
     const type = req.params.type;
@@ -69,7 +69,7 @@ server.get('/data/:year/:type', async (req, res) => {
     if (type === 'monthly') {
         // Miesięczne zapytanie
         query = `
-            SELECT nag.TrN_TrNSeria AS Seria, nag.TrN_VatMiesiac AS Miesiac, SUM(elem.TrE_WartoscPoRabacie) AS Kwota
+            SELECT nag.TrN_TrNSeria AS Seria, nag.TrN_VatMiesiac AS Miesiąc, SUM(elem.TrE_WartoscPoRabacie) AS Kwota
             FROM CDN.TraElem AS elem
             LEFT JOIN CDN.TraNag AS nag
             ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
@@ -81,7 +81,7 @@ server.get('/data/:year/:type', async (req, res) => {
         query = `
             SELECT
                 nag.TrN_TrNSeria AS Seria,
-                DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) AS Tydzien,
+                DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) AS Tydzień,
                 SUM(elem.TrE_WartoscPoRabacie) AS Kwota
             FROM
                 CDN.TraElem AS elem
@@ -93,7 +93,7 @@ server.get('/data/:year/:type', async (req, res) => {
                 nag.TrN_TrNSeria,
                 DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien))
             ORDER BY
-                Tydzien
+                Tydzień
         `;
     } else if (type === 'yearly') {
         // Roczne zapytanie
@@ -118,7 +118,7 @@ server.get('/data/:year/:type', async (req, res) => {
         res.status(500).send(err.message)
     }
 })
-// Obsługa zapytań GET do serwera, ścieżka '/orders/:year/:type'
+// Zamówienia
 server.get('/orders/:year/:type', async (req, res) => {
     const year = req.params.year;
     const type = req.params.type;
@@ -127,7 +127,7 @@ server.get('/orders/:year/:type', async (req, res) => {
         // Miesięczne zapytanie
         query = `
             SELECT ZaN_ZamSeria AS Seria,
-                   MONTH(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')) AS Miesiac,
+                   MONTH(DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')) AS Miesiąc,
                    SUM(ZaE_Ilosc*ZaE_CenaUzgodniona) AS Kwota
             FROM cdn.ZamElem AS elem
             LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
@@ -141,7 +141,7 @@ server.get('/orders/:year/:type', async (req, res) => {
         query = `
             SELECT
                 ZaN_ZamSeria AS Seria,
-                DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')) AS Tydzien,
+                DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01')) AS Tydzień,
                 SUM(ZaE_Ilosc*ZaE_CenaUzgodniona) AS Kwota
             FROM
                 cdn.ZamElem AS elem
@@ -154,7 +154,7 @@ server.get('/orders/:year/:type', async (req, res) => {
                 ZaN_ZamSeria,
                 DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01'))
             ORDER BY
-                Tydzien, Seria
+                Tydzień, Seria
         `;
     } else if (type === 'yearly') {
         // Roczne zapytanie
