@@ -143,12 +143,37 @@
             text-decoration: underline;
             color: blue;
         }
+        .clickableLight {
+            cursor: pointer;
+        }
         th span {
             color: #1E1E1E; /* Kolor wskaźnika */
             margin-left: 5px; /* Odstęp od nazwy kolumny */
         }
         th span span:first-child {
             margin-right: 3px; /* Odstęp między strzałkami */
+        }
+        #startMonth, #startYear, #endMonth, #endYear, #startWeek, #endWeek, #search {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        #search {
+            background-color: cornflowerblue;
+            color: white;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        #search:hover {
+            background-color: dodgerblue;
         }
     </style>
 
@@ -174,13 +199,57 @@
                 <option value="monthly">Miesięczne</option>
                 <option value="weekly">Tygodniowe</option>
                 <option value="yearly">Roczne</option>
+                <option value="monthly-calendar">Kalendarz miesięcznie</option>
+                <option value="weekly-calendar">Kalendarz tygodniowe</option>
             </select>
+
+            <!-- Wybór miesiąca i roku dla kalendarza miesięcznego -->
+            <div v-if="selectedType === 'monthly-calendar'">
+                <label for="startMonth">Miesiąc początkowy: </label>
+                <select id="startMonth" v-model="selectedStartMonth">
+                    <option v-for="month in months" :value="month" :key="month">{{ month }}</option>
+                </select>
+                <label for="startYear">Rok początkowy: </label>
+                <select id="startYear" v-model="selectedStartYear">
+                    <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
+                </select>
+                <label for="endMonth">Miesiąc końcowy: </label>
+                <select id="endMonth" v-model="selectedEndMonth">
+                    <option v-for="month in months" :value="month" :key="month">{{ month }}</option>
+                </select>
+                <label for="endYear">Rok końcowy: </label>
+                <select id="endYear" v-model="selectedEndYear">
+                    <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
+                </select>
+                <button id="search" v-on:click="getMonthlyCalendar">Szukaj</button>
+            </div>
+
+            <!-- Wybór tygodnia i roku dla kalendarza tygodniowego -->
+            <div v-if="selectedType === 'weekly-calendar'">
+                <label for="startWeek">Tydzień początkowy: </label>
+                <select id="startWeek" v-model="selectedStartWeek">
+                    <option v-for="week in weeks" :value="week" :key="week">Tydzień {{ week }}</option>
+                </select>
+                <label for="startYear">Rok początkowy: </label>
+                <select id="startYear" v-model="selectedStartYear">
+                    <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
+                </select>
+                <label for="endWeek">Tydzień końcowy: </label>
+                <select id="endWeek" v-model="selectedEndWeek">
+                    <option v-for="week in weeks" :value="week" :key="week">Tydzień {{ week }}</option>
+                </select>
+                <label for="endYear">Rok końcowy: </label>
+                <select id="endYear" v-model="selectedEndYear">
+                    <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
+                </select>
+                <button  id="search" v-on:click="getWeeklyCalendar">Szukaj</button>
+            </div>
         </div>
         <table>
             <!-- Wyświetlanie odpowiednich kolumn w zależności od wybranej zakładki -->
             <thead>
                 <tr>
-                    <th v-if="selectedTab === 'sales'" v-for="column in columns" :key="column" @click="sortByColumn(column, 'sales')">
+                    <th class="clickableLight" v-if="selectedTab === 'sales'" v-for="column in columns" :key="column" @click="sortByColumn(column, 'sales')">
                         {{ column }}
                         <span v-if="sort.column === column">
                             <span v-if="sort.ascending">↑</span>
@@ -190,7 +259,7 @@
                             <span>↑</span><span>↓</span>
                         </span>
                     </th>
-                    <th v-if="selectedTab === 'orders'" v-for="column in orderColumns" :key="column" @click="sortByColumn(column, 'orders')">
+                    <th class="clickableLight" v-if="selectedTab === 'orders'" v-for="column in orderColumns" :key="column" @click="sortByColumn(column, 'orders')">
                         {{ column }}
                         <span v-if="sort.column === column">
                             <span v-if="sort.ascending">↑</span>
@@ -249,7 +318,7 @@
             <table>
                 <thead>
                 <tr>
-                    <th v-for="column in LensesOrdersColumns" :key="column" @click="sortByColumn(column, 'lenses')">
+                    <th class="clickableLight" v-for="column in LensesOrdersColumns" :key="column" @click="sortByColumn(column, 'lenses')">
                         {{ column }}
                         <span v-if="sort.column === column">
                             <span v-if="sort.ascending">↑</span>
@@ -288,7 +357,7 @@
             <table>
                 <thead>
                 <tr>
-                    <th v-for="column in LensesSalesColumns" :key="column" @click="sortByColumn(column, 'lenses')">
+                    <th class="clickableLight" v-for="column in LensesSalesColumns" :key="column" @click="sortByColumn(column, 'lenses')">
                         {{ column }}
                         <span v-if="sort.column === column">
                             <span v-if="sort.ascending">↑</span>
@@ -339,7 +408,7 @@
         <table>
             <thead>
                 <tr>
-                    <th v-for="column in clientTransactionsColumns" :key="column" @click="sortByColumn(column, 'client')">
+                    <th class="clickableLight" v-for="column in clientTransactionsColumns" :key="column" @click="sortByColumn(column, 'client')">
                         {{ column }}
                         <span v-if="sort.column === column">
                             <span v-if="sort.ascending">↑</span>

@@ -35,20 +35,34 @@ const app = Vue.createApp({
                 column: null,
                 ascending: true
             }, // sortowanie
+            selectedStartMonth: null, // wybrany początkowy miesiąc
+            selectedEndMonth: null, // wybrany końcowy miesiąc
+            selectedStartWeek: null, // wybrany początkowy tydzień
+            selectedEndWeek: null, // wybrany końcowy tydzień
+            selectedStartYear: null, // wybrany początkowy rok
+            selectedEndYear: null, // wybrany końcowy rok
+            weeks: Array.from({length: 52}, (_, i) => i + 1), // tablica tygodni
         }
     },
     watch: {
         // Funkcje wywoływane przy zmianie obserwowanych wartości
         selectedYear() {
-            this.fetchData()  // Pobierz dane przy zmianie roku
+            if (this.selectedType === 'weekly' || this.selectedType === 'monthly') {
+                this.fetchData()  // Pobierz dane przy zmianie roku
+            }
         },
         selectedType() {
-            this.fetchData()  // Pobierz dane przy zmianie typu (miesięczny/tygodniowy/roczny)
-            this.updateColumns();  // Aktualizuj kolumny przy zmianie typu
+            if (this.selectedType === 'weekly' || this.selectedType === 'monthly' || this.selectedType === 'yearly') {
+                this.fetchData()  // Pobierz dane przy zmianie typu (miesięczny/tygodniowy/roczny)
+            }
+            this.updateColumns();  // Zaktualizuj kolumny
         },
         selectedTab() {
-            this.fetchData()  // Pobierz dane przy zmianie zakładki
-            if (this.selectedTab === 'lenses') {
+            if (this.selectedTab === 'sales' || this.selectedTab === 'orders') {
+                if (this.selectedType === 'weekly' || this.selectedType === 'monthly' || this.selectedType === 'yearly') {
+                    this.fetchData()  // Pobierz dane przy zmianie zakładki
+                }
+            }else if (this.selectedTab === 'lenses') {
                 this.fetchProducts();
             }else if (this.selectedTab === 'client') {
                 this.fetchClients();
@@ -124,6 +138,10 @@ const app = Vue.createApp({
                 periodColumn = 'Tydzień';
             } else if (this.selectedType === 'yearly') {
                 periodColumn = 'Rok';
+            } else if (this.selectedType === 'monthly-calendar') {
+                periodColumn = 'Miesiąc_Rok';
+            } else if (this.selectedType === 'weekly-calendar') {
+                periodColumn = 'Tydzień_Rok';
             }
             this.orderColumns = [periodColumn, 'BEST (EUR)', 'LAUF (EUR)', 'SWG (PLN)'];
         },
@@ -277,7 +295,9 @@ const app = Vue.createApp({
         sortTable(data, column) {
             isMonth = column === 'Miesiąc';
             isWeek = column === 'Tydzień';
-            if (column === 'Miesiąc' || column === 'Tydzień' || column === 'Rok') {
+            isMonthYearFormat = column === 'Miesiąc_Rok';
+            isWeekYearFormat = column === 'Tydzień_Rok';
+            if (column === 'Miesiąc' || column === 'Tydzień' || column === 'Rok' || column === 'Miesiąc_Rok' || column === 'Tydzień_Rok') {
                 column = 'period';
             }
             data.sort((a, b) => {
@@ -292,6 +312,18 @@ const app = Vue.createApp({
                     const weekNumA = parseInt(valueA.split(' ')[1]) || 0;
                     const weekNumB = parseInt(valueB.split(' ')[1]) || 0;
                     return this.sort.ascending ? weekNumA - weekNumB : weekNumB - weekNumA;
+                } else if (isMonthYearFormat) {
+                    const [monthA, yearA] = valueA.split('-').map(Number);
+                    const [monthB, yearB] = valueB.split('-').map(Number);
+                    const dateA = new Date(yearA, monthA - 1);
+                    const dateB = new Date(yearB, monthB - 1);
+                    return this.sort.ascending ? dateA - dateB : dateB - dateA;
+                } else if (isWeekYearFormat) {
+                    const [weekA, yearA] = valueA.split('-').map(Number);
+                    const [weekB, yearB] = valueB.split('-').map(Number);
+                    const dateA = new Date(yearA, 0, 1 + (weekA - 1) * 7);
+                    const dateB = new Date(yearB, 0, 1 + (weekB - 1) * 7);
+                    return this.sort.ascending ? dateA - dateB : dateB - dateA;
                 }
 
                 // Próbuj zamienić na liczbę; jeśli się nie uda, użyj oryginalnej wartości
@@ -305,6 +337,39 @@ const app = Vue.createApp({
                     return this.sort.ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
                 }
             });
+        },
+        // Funkcja do pobierania miesięcznej sprzedaży pod datach
+        async getMonthlyCalendar() {
+            // convert month to number
+            let monthStart = this.months.indexOf(this.selectedStartMonth) + 1;
+            let monthEnd = this.months.indexOf(this.selectedEndMonth) + 1;
+            let url = '';
+            if (this.selectedTab === 'sales') {
+                url = `http://localhost:3000/sales-months-calendar/${monthStart}/${this.selectedStartYear}/${monthEnd}/${this.selectedEndYear}`
+            } else if (this.selectedTab === 'orders') {
+                url = `http://localhost:3000/orders-months-calendar/${monthStart}/${this.selectedStartYear}/${monthEnd}/${this.selectedEndYear}`
+            }
+            try {
+                const response = await axios.get(url)
+                this.data = response.data
+            } catch (err) {
+                console.error(err)
+            }
+        },
+        // Funkcja do pobierania tygodniowej sprzedaży pod datach
+        async getWeeklyCalendar() {
+            let url = '';
+            if (this.selectedTab === 'sales') {
+                url = `http://localhost:3000/sales-weeks-calendar/${this.selectedStartWeek}/${this.selectedStartYear}/${this.selectedEndWeek}/${this.selectedEndYear}`
+            } else if (this.selectedTab === 'orders') {
+                url = `http://localhost:3000/orders-weeks-calendar/${this.selectedStartWeek}/${this.selectedStartYear}/${this.selectedEndWeek}/${this.selectedEndYear}`
+            }
+            try {
+                const response = await axios.get(url)
+                this.data = response.data
+            } catch (err) {
+                console.error(err)
+            }
         }
     },
     computed: {
@@ -323,6 +388,10 @@ const app = Vue.createApp({
                     periodKey = 'Tydzień ' + item.Tydzień;
                 } else if (this.selectedType === 'yearly') {
                     periodKey = item.Rok;
+                } else if (this.selectedType === 'monthly-calendar') {
+                    periodKey = item.Miesiąc_Rok;
+                } else if (this.selectedType === 'weekly-calendar') {
+                    periodKey = item.Tydzień_Rok;
                 }
                 if (!data[periodKey]) {
                     data[periodKey] = {period: periodKey}

@@ -118,6 +118,102 @@ server.get('/data/:year/:type', async (req, res) => {
         res.status(500).send(err.message)
     }
 })
+// Sprzedaż - kalendarz miesięcznie
+server.get('/sales-months-calendar/:monthStart/:yearStart/:monthEnd/:yearEnd', async (req, res) => {
+    const monthStart = req.params.monthStart;
+    const yearStart = req.params.yearStart;
+    const monthEnd = req.params.monthEnd;
+    const yearEnd = req.params.yearEnd;
+
+    const request = new sql.Request(pool);
+    request.input('monthStart', sql.Int, monthStart);
+    request.input('yearStart', sql.Int, yearStart);
+    request.input('monthEnd', sql.Int, monthEnd);
+    request.input('yearEnd', sql.Int, yearEnd);
+
+    const query = `
+    SELECT
+        nag.TrN_TrNSeria AS Seria,
+        CONCAT(nag.TrN_VatMiesiac, '-', nag.TrN_VatRok) AS Miesiąc_Rok,
+        SUM(elem.TrE_WartoscPoRabacie) AS Kwota
+    FROM
+        CDN.TraElem AS elem
+        LEFT JOIN CDN.TraNag AS nag
+        ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
+    WHERE
+        (
+            (nag.TrN_VatRok = ${yearStart} AND nag.TrN_VatMiesiac >= ${monthStart} AND (nag.TrN_VatRok < ${yearEnd} OR (nag.TrN_VatRok = ${yearEnd} AND nag.TrN_VatMiesiac <= ${monthEnd})))
+            OR
+            (nag.TrN_VatRok > ${yearStart} AND nag.TrN_VatRok < ${yearEnd})
+            OR
+            (nag.TrN_VatRok = ${yearEnd} AND nag.TrN_VatMiesiac <= ${monthEnd} AND nag.TrN_VatRok > ${yearStart})
+        )
+        AND nag.TrN_TrNSeria IN ('BEST', 'LAUF', 'SWG')
+    GROUP BY
+        nag.TrN_TrNSeria,
+        nag.TrN_VatMiesiac,
+        nag.TrN_VatRok
+    ORDER BY
+        nag.TrN_VatRok,
+        nag.TrN_VatMiesiac,
+        nag.TrN_TrNSeria
+    `;
+    try {
+        const result = await request.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+})
+// Sprzedaż - kalendarz tygodniowo
+server.get('/sales-weeks-calendar/:weekStart/:yearStart/:weekEnd/:yearEnd', async (req, res) => {
+    const weekStart = req.params.weekStart;
+    const yearStart = req.params.yearStart;
+    const weekEnd = req.params.weekEnd;
+    const yearEnd = req.params.yearEnd;
+
+    const request = new sql.Request(pool);
+    request.input('weekStart', sql.Int, weekStart);
+    request.input('yearStart', sql.Int, yearStart);
+    request.input('weekEnd', sql.Int, weekEnd);
+    request.input('yearEnd', sql.Int, yearEnd);
+
+    const query = `
+    SELECT
+    nag.TrN_TrNSeria AS Seria,
+    CONCAT(DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)), '-', nag.TrN_VatRok) AS Tydzień_Rok,
+    SUM(elem.TrE_WartoscPoRabacie) AS Kwota
+    FROM
+        CDN.TraElem AS elem
+        LEFT JOIN CDN.TraNag AS nag
+        ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
+    WHERE
+        (
+            (DATEPART(YEAR, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) = ${yearStart} AND DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) >= ${weekStart} AND (DATEPART(YEAR, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) < ${yearEnd} OR (DATEPART(YEAR, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) = ${yearEnd} AND DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) <= ${weekEnd})))
+            OR
+            (DATEPART(YEAR, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) > ${yearStart} AND DATEPART(YEAR, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) < ${yearEnd})
+            OR
+            (DATEPART(YEAR, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) = ${yearEnd} AND DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) <= ${weekEnd} AND DATEPART(YEAR, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)) > ${yearStart})
+        )
+        AND nag.TrN_TrNSeria IN ('BEST', 'LAUF', 'SWG')
+    GROUP BY
+        nag.TrN_TrNSeria,
+        DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)),
+        nag.TrN_VatRok
+    ORDER BY
+        nag.TrN_VatRok,
+        DATEPART(ISO_WEEK, DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien)),
+        nag.TrN_TrNSeria
+    `;
+    try {
+        const result = await request.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+})
 // Zamówienia
 server.get('/orders/:year/:type', async (req, res) => {
     const year = req.params.year;
@@ -178,6 +274,102 @@ server.get('/orders/:year/:type', async (req, res) => {
         res.status(500).send(err.message)
     }
 });
+// Zamówienia - kalendarz miesięcznie
+server.get('/orders-months-calendar/:monthStart/:yearStart/:monthEnd/:yearEnd', async (req, res) => {
+    const monthStart = req.params.monthStart;
+    const yearStart = req.params.yearStart;
+    const monthEnd = req.params.monthEnd;
+    const yearEnd = req.params.yearEnd;
+
+    const request = new sql.Request(pool);
+    request.input('monthStart', sql.Int, monthStart);
+    request.input('yearStart', sql.Int, yearStart);
+    request.input('monthEnd', sql.Int, monthEnd);
+    request.input('yearEnd', sql.Int, yearEnd);
+
+    const query = `
+    SELECT
+        ZaN_ZamSeria AS Seria,
+        CONCAT(MONTH(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')), '-', YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01'))) AS Miesiąc_Rok,
+        SUM(ZaE_Ilosc * ZaE_CenaUzgodniona) AS Kwota
+    FROM
+        cdn.ZamElem AS elem
+        LEFT JOIN cdn.ZamNag AS nag
+        ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
+    WHERE
+        (
+            (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) = ${yearStart} AND MONTH(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) >= ${monthStart} AND (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) < ${yearEnd} OR (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) = ${yearEnd} AND MONTH(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) <= ${monthEnd})))
+            OR
+            (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) > ${yearStart} AND YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) < ${yearEnd})
+            OR
+            (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) = ${yearEnd} AND MONTH(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) <= ${monthEnd} AND YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) > ${yearStart})
+        )
+        AND ZaN_ZamSeria IN ('BEST', 'LAUF', 'SWG')
+    GROUP BY
+        ZaN_ZamSeria,
+        MONTH(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')),
+        YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01'))
+    ORDER BY
+        YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')),
+        MONTH(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')),
+        ZaN_ZamSeria
+    `;
+    try {
+        const result = await request.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+})
+// Zamówienia - kalendarz tygodniowo
+server.get('/orders-weeks-calendar/:weekStart/:yearStart/:weekEnd/:yearEnd', async (req, res) => {
+    const weekStart = req.params.weekStart;
+    const yearStart = req.params.yearStart;
+    const weekEnd = req.params.weekEnd;
+    const yearEnd = req.params.yearEnd;
+
+    const request = new sql.Request(pool);
+    request.input('weekStart', sql.Int, weekStart);
+    request.input('yearStart', sql.Int, yearStart);
+    request.input('weekEnd', sql.Int, weekEnd);
+    request.input('yearEnd', sql.Int, yearEnd);
+
+    const query = `
+    SELECT
+        ZaN_ZamSeria AS Seria,
+        CONCAT(DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')), '-', YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01'))) AS Tydzień_Rok,
+        SUM(ZaE_Ilosc * ZaE_CenaUzgodniona) AS Kwota
+    FROM
+        cdn.ZamElem AS elem
+        LEFT JOIN cdn.ZamNag AS nag
+        ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
+    WHERE
+        (
+            (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) = ${yearStart} AND DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) >= ${weekStart} AND (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) < ${yearEnd} OR (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) = ${yearEnd} AND DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) <= ${weekEnd})))
+            OR
+            (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) > ${yearStart} AND YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) < ${yearEnd})
+            OR
+            (YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) = ${yearEnd} AND DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) <= ${weekEnd} AND YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')) > ${yearStart})
+        )
+        AND ZaN_ZamSeria IN ('BEST', 'LAUF', 'SWG')
+    GROUP BY
+        ZaN_ZamSeria,
+        DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')),
+        YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01'))
+    ORDER BY
+        YEAR(DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')),
+        DATEPART(ISO_WEEK, DATEADD(day, ZaN_DataWystawienia - 36163, '1900-01-01')),
+        ZaN_ZamSeria
+    `;
+    try {
+        const result = await request.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+})
 // Obsługa zapytań GET do serwera, ścieżka '/products'
 server.get('/products', async (req, res) => {
     const query = `
