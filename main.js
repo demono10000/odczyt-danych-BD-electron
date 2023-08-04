@@ -612,7 +612,7 @@ WITH ranked_rows AS (
     TrE_Ilosc AS Wyslane,
     ZaE_Ilosc AS Zamowione,
     ZaN_DokumentObcy AS Bestellung,
-    ROW_NUMBER() OVER(PARTITION BY ZaN_DokumentObcy ORDER BY TrE_Ilosc DESC) AS rn,
+    DENSE_RANK() OVER(PARTITION BY ZaN_DokumentObcy, DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01') ORDER BY TrE_Ilosc DESC) AS rn,
     DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01') As Data
   FROM
     cdn.zamelem a
