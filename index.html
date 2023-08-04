@@ -190,7 +190,7 @@
     <div v-show="selectedTab === 'sales' || selectedTab === 'orders'">
         <div>
             <!-- Kontrolki do wyboru roku i typu sumowania -->
-            <label for="year" v-show="selectedType !== 'yearly'">Wybierz rok: </label>
+            <label for="year" v-show="selectedType === 'monthly' || selectedType === 'weekly'">Wybierz rok: </label>
             <select id="year" v-model="selectedYear" v-show="selectedType === 'monthly' || selectedType === 'weekly'">
                 <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
             </select>
