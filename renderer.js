@@ -54,6 +54,8 @@ const app = Vue.createApp({
         selectedType() {
             if (this.selectedType === 'weekly' || this.selectedType === 'monthly' || this.selectedType === 'yearly') {
                 this.fetchData()  // Pobierz dane przy zmianie typu (miesięczny/tygodniowy/roczny)
+            } else if (this.selectedType === 'monthly-calendar' || this.selectedType === 'weekly-calendar') {
+                this.data = [];
             }
             this.updateColumns();  // Zaktualizuj kolumny
         },
@@ -61,6 +63,8 @@ const app = Vue.createApp({
             if (this.selectedTab === 'sales' || this.selectedTab === 'orders') {
                 if (this.selectedType === 'weekly' || this.selectedType === 'monthly' || this.selectedType === 'yearly') {
                     this.fetchData()  // Pobierz dane przy zmianie zakładki
+                } else if (this.selectedType === 'monthly-calendar' || this.selectedType === 'weekly-calendar') {
+                    this.data = [];
                 }
             }else if (this.selectedTab === 'lenses') {
                 this.fetchProducts();
@@ -119,6 +123,7 @@ const app = Vue.createApp({
             try {
                 const response = await axios.get(url)
                 this.data = response.data
+                this.sort.column = null;
             } catch (err) {
                 console.error(err)
             }
@@ -144,6 +149,7 @@ const app = Vue.createApp({
                 periodColumn = 'Tydzień_Rok';
             }
             this.orderColumns = [periodColumn, 'BEST (EUR)', 'LAUF (EUR)', 'SWG (PLN)'];
+            this.sort.column = null;
         },
         async fetchProducts() {
             const url = 'http://localhost:3000/products';
@@ -352,6 +358,7 @@ const app = Vue.createApp({
             try {
                 const response = await axios.get(url)
                 this.data = response.data
+                this.sort.column = null;
             } catch (err) {
                 console.error(err)
             }
@@ -367,6 +374,7 @@ const app = Vue.createApp({
             try {
                 const response = await axios.get(url)
                 this.data = response.data
+                this.sort.column = null;
             } catch (err) {
                 console.error(err)
             }
