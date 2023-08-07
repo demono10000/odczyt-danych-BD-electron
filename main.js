@@ -650,7 +650,28 @@ SELECT
         res.status(500).send(err.message);
     }
 });
+// soczewki - sod - ze szklad
+server.get('/sod-lens-from-glass/:code', async (req, res) => {
+    const code = req.params.code;
+    const query = `
+        SELECT
+        CASE
+            WHEN CHARINDEX(CHAR(10), CAST(OPIS AS varchar(max))) > 0
+            THEN LEFT(CAST(OPIS AS varchar(max)), CHARINDEX(CHAR(10), CAST(OPIS AS varchar(max))) - 1)
+            ELSE CAST(OPIS AS varchar(max))
+        END AS Soczewka
+    FROM SPRAWA
+    WHERE OPIS LIKE '%${code}%'
+    `;
 
+    try {
+        const result = await poolSOD.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
 
 
 
@@ -674,6 +695,7 @@ function createWindow () {
         height: 600,
         webPreferences: {
             nodeIntegration: true,
+            contextIsolation: false
         }
     })
 

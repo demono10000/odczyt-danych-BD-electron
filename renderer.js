@@ -1,4 +1,5 @@
 // renderer.js
+const glasses = require('./glasses.js');
 
 // Tworzenie aplikacji Vue.js
 const app = Vue.createApp({
@@ -42,6 +43,12 @@ const app = Vue.createApp({
             selectedStartYear: null, // wybrany początkowy rok
             selectedEndYear: null, // wybrany końcowy rok
             weeks: Array.from({length: 52}, (_, i) => i + 1), // tablica tygodni
+            selectedGlass: null, // wybrana szkło
+            glassFilter: '', // filtr dla szkieł
+            glassSearch: '', // szukane szkło
+            glasses, // lista szkieł
+            lenses: [], // lista soczewek
+            LensesColumns: ['Soczewka'], // kolumny dla tabeli soczewek
         }
     },
     watch: {
@@ -106,6 +113,18 @@ const app = Vue.createApp({
                 if (newVal !== oldVal) {
                     this.fetchClientTransactionsData();
                     this.sort.column = null;
+                }
+            }
+        },
+        selectedGlass: {
+            handler(newVal, oldVal) {
+                this.glassSearch = newVal;
+            }
+        },
+        glassSearch: {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.getLenses();
                 }
             }
         }
@@ -296,6 +315,8 @@ const app = Vue.createApp({
                 this.sortTable(this.transformedData, column)
             } else if (table === 'sales') {
                 this.sortTable(this.transformedData, column)
+            } else if (table === 'glass') {
+                this.sortTable(this.lenses, column)
             }
         },
         sortTable(data, column) {
@@ -378,6 +399,15 @@ const app = Vue.createApp({
             } catch (err) {
                 console.error(err)
             }
+        },
+        // Funkcja do odczytu soczewek na podstawie szkła
+        async getLenses() {
+            try {
+                const response = await axios.get(`http://localhost:3000/sod-lens-from-glass/${this.glassSearch}`)
+                this.lenses = response.data
+            } catch (err) {
+                console.error(err)
+            }
         }
     },
     computed: {
@@ -457,6 +487,9 @@ const app = Vue.createApp({
         },
         filteredClients() {
             return this.clients.filter(client => client.Atr_Wartosc.toLowerCase().includes(this.clientFilter.toLowerCase()));
+        },
+        filteredGlasses() {
+            return this.glasses.filter(glass => glass.toLowerCase().includes(this.glassFilter.toLowerCase()));
         }
     }
 })

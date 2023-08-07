@@ -175,6 +175,13 @@
         #search:hover {
             background-color: dodgerblue;
         }
+        td.centered {
+            text-align: center;
+        }
+        th.centered {
+             text-align: center;
+        }
+
     </style>
 
 </head>
@@ -186,6 +193,7 @@
         <button v-bind:class="{ active: selectedTab === 'orders' }" v-on:click="selectedTab = 'orders'">Zamówienia</button>
         <button v-bind:class="{ active: selectedTab === 'lenses' }" v-on:click="selectedTab = 'lenses'">Soczewki</button>
         <button v-bind:class="{ active: selectedTab === 'client' }" v-on:click="selectedTab = 'client'">Klient</button>
+        <button v-bind:class="{ active: selectedTab === 'glass' }" v-on:click="selectedTab = 'glass'">Szkło</button>
     </div>
     <div v-show="selectedTab === 'sales' || selectedTab === 'orders'">
         <div>
@@ -435,12 +443,43 @@
             </tbody>
         </table>
     </div>
+    <div v-show="selectedTab === 'glass'">
+        <div class="panel-container">
+            <div class="filter-panel">
+                <label for="client">Wybierz szkło: </label>
+                <select id="client" v-model="selectedGlass">
+                    <option v-for="glass in filteredGlasses" :value="glass" :key="glass">{{ glass }}</option>
+                </select>
+                <input type="text" v-model="glassFilter" placeholder="Filtruj liste szkła..." />
+                <input type="text" v-model="glassSearch" placeholder="Znajdź szkło..." />
+            </div>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th class="clickableLight centered" v-for="column in LensesColumns" :key="column" @click="sortByColumn(column, 'glass')">
+                    {{ column }}
+                    <span v-if="sort.column === column">
+                            <span v-if="sort.ascending">↑</span>
+                            <span v-else>↓</span>
+                         </span>
+                    <span v-else>
+                            <span>↑</span><span>↓</span>
+                        </span>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="row in lenses" :key="row.Soczewka">
+                <td class="clickable centered" @click="showLens(row['Soczewka'])">{{ row['Soczewka'] || '-' }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 <!-- Biblioteki skryptów -->
 <script src="https://unpkg.com/vue@next"></script>  <!-- Vue.js -->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>  <!-- Axios.js -->
 <script src="renderer.js"></script>  <!-- Główny skrypt -->
-
-
 </body>
 </html>
