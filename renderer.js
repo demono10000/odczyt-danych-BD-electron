@@ -1,5 +1,4 @@
 // renderer.js
-const glasses = require('./glasses.js');
 
 // Tworzenie aplikacji Vue.js
 const app = Vue.createApp({
@@ -46,7 +45,7 @@ const app = Vue.createApp({
             selectedGlass: null, // wybrana szkło
             glassFilter: '', // filtr dla szkieł
             glassSearch: '', // szukane szkło
-            glasses, // lista szkieł
+            glasses: [], // lista szkieł
             lenses: [], // lista soczewek
             LensesColumns: ['Soczewka'], // kolumny dla tabeli soczewek
         }
@@ -131,6 +130,7 @@ const app = Vue.createApp({
     },
     created() {
         this.fetchData();  // Pobierz dane na początku
+        this.getGlasses();
     },
     methods: {
         // Metoda do pobierania danych
@@ -408,7 +408,17 @@ const app = Vue.createApp({
             } catch (err) {
                 console.error(err)
             }
-        }
+        },
+        // Funkcja do odczytu szkieł
+        async getGlasses(){
+            try {
+                const response = await axios.get(`http://localhost:3000/glasses`)
+                this.glasses = response.data.glasses
+                console.log(this.glasses)
+            } catch (err) {
+                console.error(err)
+            }
+        },
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn

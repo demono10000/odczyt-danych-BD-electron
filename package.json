@@ -1,6 +1,6 @@
 {
   "name": "odczyt_danych_bd",
-  "version": "1.6",
+  "version": "1.6.0",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "vue": "^3.3.4",
     "vue-next-select": "^2.10.5",
     "vuetify": "^3.3.10"
+
   },
   "build": {
     "appId": "pl.pawelsoltys.sumafaktur",
@@ -53,7 +54,8 @@
       "output": "wyjscie"
     },
     "files": [
-      "**/*"
+      "**/*",
+      "data_files/**/*"
     ]
   }
 }

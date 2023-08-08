@@ -17,6 +17,7 @@ const server = express()
 const port = 3000
 
 const secret = require('./secret.js'); // Importowanie poufnych danych, takich jak nazwa użytkownika i hasło do bazy danych
+const glasses = require('./data_files/glasses.json'); // Importowanie danych dotyczących szkieł
 
 // Konfiguracja połączenia do bazy danych
 const config = {
@@ -672,7 +673,10 @@ server.get('/sod-lens-from-glass/:code', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
-
+// Odczyt listy szkieł
+server.get('/glasses', async (req, res) => {
+    return res.json(glasses);
+});
 
 
 // Uruchomienie serwera
