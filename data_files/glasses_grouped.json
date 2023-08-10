@@ -1,0 +1,1011 @@
+{
+    "glasses": [
+        {
+            "SCHOTT": "BAF2",
+            "CDGM": "BAF2",
+            "OHARA": "BAM2"
+        },
+        {
+            "SCHOTT": "BAF3",
+            "CDGM": "BAF4",
+            "OHARA": "BAM3"
+        },
+        {
+            "SCHOTT": "N-BAK4",
+            "CDGM": "BAK7",
+            "OHARA": "S-BAL14"
+        },
+        {
+            "CDGM": "D-FK61"
+        },
+        {
+            "CDGM": "D-K59"
+        },
+        {
+            "SCHOTT": "P-BK7",
+            "CDGM": "D-K9",
+            "OHARA": "L-BSL7"
+        },
+        {
+            "CDGM": "D-LaF050"
+        },
+        {
+            "CDGM": "D-LaF50"
+        },
+        {
+            "CDGM": "D-LaF53",
+            "OHARA": "L-LAM60"
+        },
+        {
+            "CDGM": "D-LaF79",
+            "OHARA": "L-LAM69"
+        },
+        {
+            "CDGM": "D-LaF82L",
+            "OHARA": "(L-LAM72)"
+        },
+        {
+            "CDGM": "D-LaK5",
+            "OHARA": "L-LAL12"
+        },
+        {
+            "SCHOTT": "P-LAK35",
+            "CDGM": "D-LaK6",
+            "OHARA": "L-LAL13"
+        },
+        {
+            "CDGM": "D-LaK70"
+        },
+        {
+            "CDGM": "D-PK3"
+        },
+        {
+            "SCHOTT": "P-SF8",
+            "CDGM": "D-ZF10",
+            "OHARA": "L-TIM28"
+        },
+        {
+            "CDGM": "D-ZF93"
+        },
+        {
+            "CDGM": "D-ZK2",
+            "OHARA": "L-BAL42"
+        },
+        {
+            "SCHOTT": "P-SK58A",
+            "CDGM": "D-ZK3",
+            "OHARA": "L-BAL35"
+        },
+        {
+            "CDGM": "D-ZK3L"
+        },
+        {
+            "SCHOTT": "P-SK60",
+            "CDGM": "D-ZK79"
+        },
+        {
+            "CDGM": "D-ZLaF50"
+        },
+        {
+            "SCHOTT": "P-LASF51",
+            "CDGM": "D-ZLaF52LA"
+        },
+        {
+            "CDGM": "D-ZLaF61"
+        },
+        {
+            "CDGM": "D-ZLaF67"
+        },
+        {
+            "SCHOTT": "P-LASF50",
+            "CDGM": "D-ZLaF81"
+        },
+        {
+            "CDGM": "D-ZLaF85A",
+            "OHARA": "L-LAH85V"
+        },
+        {
+            "CDGM": "D-ZLaF85L",
+            "OHARA": "L-LAH85V"
+        },
+        {
+            "CDGM": "D-ZPK1A"
+        },
+        {
+            "SCHOTT": "F5",
+            "CDGM": "F1",
+            "OHARA": "F5"
+        },
+        {
+            "SCHOTT": "F1",
+            "CDGM": "F13",
+            "OHARA": "PBM1"
+        },
+        {
+            "SCHOTT": "F3",
+            "CDGM": "F2",
+            "OHARA": "PBM3"
+        },
+        {
+            "SCHOTT": "F4",
+            "CDGM": "F3",
+            "OHARA": "PBM4"
+        },
+        {
+            "SCHOTT": "F2",
+            "CDGM": "F4",
+            "OHARA": "PBM2"
+        },
+        {
+            "SCHOTT": "F2HT",
+            "CDGM": "F4GT",
+            "OHARA": "PBM2Y"
+        },
+        {
+            "CDGM": "F5",
+            "OHARA": "PBM11"
+        },
+        {
+            "SCHOTT": "F7",
+            "CDGM": "F6"
+        },
+        {
+            "SCHOTT": "F6",
+            "CDGM": "F7",
+            "OHARA": "PBM6"
+        },
+        {
+            "CDGM": "H-BaF2"
+        },
+        {
+            "SCHOTT": "N-BALF4",
+            "CDGM": "H-BAF3"
+        },
+        {
+            "SCHOTT": "N-BAF4",
+            "CDGM": "H-BAF5"
+        },
+        {
+            "SCHOTT": "N-BAF52",
+            "CDGM": "H-BaF6"
+        },
+        {
+            "CDGM": "H-BaF7"
+        },
+        {
+            "CDGM": "H-BAF8"
+        },
+        {
+            "CDGM": "H-BAK1"
+        },
+        {
+            "SCHOTT": "N-BAK2",
+            "CDGM": "H-BAK2",
+            "OHARA": "S-BAL12"
+        },
+        {
+            "CDGM": "H-BAK3",
+            "OHARA": "S-BAL21"
+        },
+        {
+            "SCHOTT": "N-PSK3",
+            "CDGM": "H-BAK4",
+            "OHARA": "BAL23"
+        },
+        {
+            "CDGM": "H-BAK5"
+        },
+        {
+            "SCHOTT": "N-SK11",
+            "CDGM": "H-BAK6",
+            "OHARA": "S-BAL41"
+        },
+        {
+            "SCHOTT": "N-BAK4",
+            "CDGM": "H-BAK7",
+            "OHARA": "S-BAL14"
+        },
+        {
+            "SCHOTT": "N-BAK4HT",
+            "CDGM": "H-BAK7GT"
+        },
+        {
+            "SCHOTT": "N-BAK1",
+            "CDGM": "H-BAK8",
+            "OHARA": "S-BAL11"
+        },
+        {
+            "CDGM": "H-F1",
+            "OHARA": "S-TIM5"
+        },
+        {
+            "CDGM": "H-F13",
+            "OHARA": "S-TIM1"
+        },
+        {
+            "CDGM": "H-F2",
+            "OHARA": "S-TIM3"
+        },
+        {
+            "SCHOTT": "N-F2",
+            "CDGM": "H-F4",
+            "OHARA": "S-TIM2"
+        },
+        {
+            "SCHOTT": "F2HT",
+            "CDGM": "H-F4GT"
+        },
+        {
+            "CDGM": "H-F51",
+            "OHARA": "S-TIM27"
+        },
+        {
+            "SCHOTT": "N-PK52",
+            "CDGM": "H-FK61",
+            "OHARA": "S-FPL51"
+        },
+        {
+            "CDGM": "H-FK71"
+        },
+        {
+            "CDGM": "H-FK95N",
+            "OHARA": "S-FPL53"
+        },
+        {
+            "CDGM": "H-K1"
+        },
+        {
+            "CDGM": "H-K10",
+            "OHARA": "S-NSL3"
+        },
+        {
+            "SCHOTT": "BALK1",
+            "CDGM": "H-K11",
+            "OHARA": "NSL21"
+        },
+        {
+            "SCHOTT": "ZK5",
+            "CDGM": "H-K12"
+        },
+        {
+            "SCHOTT": "BK4",
+            "CDGM": "H-K2",
+            "OHARA": "BSL 4"
+        },
+        {
+            "SCHOTT": "BK5",
+            "CDGM": "H-K3"
+        },
+        {
+            "SCHOTT": "BK1",
+            "CDGM": "H-K5",
+            "OHARA": "S-BSL1"
+        },
+        {
+            "SCHOTT": "N-K5",
+            "CDGM": "H-K50",
+            "OHARA": "S-NSL5"
+        },
+        {
+            "CDGM": "H-K51",
+            "OHARA": "NSL51"
+        },
+        {
+            "SCHOTT": "K7",
+            "CDGM": "H-K6",
+            "OHARA": "NSL7"
+        },
+        {
+            "CDGM": "H-K7"
+        },
+        {
+            "CDGM": "H-K8"
+        },
+        {
+            "SCHOTT": "N-BK7",
+            "CDGM": "H-K9L",
+            "OHARA": "S-BSL7"
+        },
+        {
+            "SCHOTT": "N-BK7HT",
+            "CDGM": "H-K9LGT"
+        },
+        {
+            "CDGM": "H-KF6",
+            "OHARA": "S-NSL36"
+        },
+        {
+            "CDGM": "H-LAF1",
+            "OHARA": "S-LaL58"
+        },
+        {
+            "SCHOTT": "N-LaF21",
+            "CDGM": "H-LAF10LA",
+            "OHARA": "S-LAH64"
+        },
+        {
+            "SCHOTT": "N-LAF3",
+            "CDGM": "H-LAF2",
+            "OHARA": "S-LAM3"
+        },
+        {
+            "SCHOTT": "N-LAF2",
+            "CDGM": "H-LAF3B",
+            "OHARA": "S-LAM2"
+        },
+        {
+            "SCHOTT": "N-LAFN7",
+            "CDGM": "H-LAF4",
+            "OHARA": "S-LAM7"
+        },
+        {
+            "CDGM": "H-LAF4GT"
+        },
+        {
+            "SCHOTT": "N-LAF34",
+            "CDGM": "H-LAF50B",
+            "OHARA": "S-LAH66"
+        },
+        {
+            "CDGM": "H-LAF51",
+            "OHARA": "S-LAM51"
+        },
+        {
+            "SCHOTT": "N-LAF33",
+            "CDGM": "H-LAF52",
+            "OHARA": "S-LAH51"
+        },
+        {
+            "SCHOTT": "N-LaF35",
+            "CDGM": "H-LAF53",
+            "OHARA": "S-LAM60"
+        },
+        {
+            "SCHOTT": "N-LAF36",
+            "CDGM": "H-LAF54",
+            "OHARA": "S-LAH52"
+        },
+        {
+            "CDGM": "H-LAF55",
+            "OHARA": "S-LAM55"
+        },
+        {
+            "CDGM": "H-LAF62",
+            "OHARA": "S-LAM52"
+        },
+        {
+            "SCHOTT": "N-LAF24",
+            "CDGM": "H-LAF6LA",
+            "OHARA": "S-LAM54"
+        },
+        {
+            "SCHOTT": "LAF22A",
+            "CDGM": "H-LAF7"
+        },
+        {
+            "CDGM": "H-LaFL5"
+        },
+        {
+            "SCHOTT": "LAK11",
+            "CDGM": "H-LAK1",
+            "OHARA": "LAL11"
+        },
+        {
+            "SCHOTT": "N-LAK22",
+            "CDGM": "H-LAK10",
+            "OHARA": "S-LAL54"
+        },
+        {
+            "CDGM": "H-LAK11"
+        },
+        {
+            "SCHOTT": "N-LAK24",
+            "CDGM": "H-LAK12",
+            "OHARA": "S-LAL64"
+        },
+        {
+            "CDGM": "H-LAK2A"
+        },
+        {
+            "CDGM": "H-LAK3"
+        },
+        {
+            "SCHOTT": "N-LAK21",
+            "CDGM": "H-LAK4L",
+            "OHARA": "S-BSM81"
+        },
+        {
+            "SCHOTT": "N-LAK12",
+            "CDGM": "H-LAK5",
+            "OHARA": "S-LAL12"
+        },
+        {
+            "SCHOTT": "N-LAK7",
+            "CDGM": "H-LAK50A",
+            "OHARA": "S-LAL7"
+        },
+        {
+            "SCHOTT": "N-LAK14",
+            "CDGM": "H-LAK51A",
+            "OHARA": "S-LAL14"
+        },
+        {
+            "SCHOTT": "N-LAK34",
+            "CDGM": "H-LAK52",
+            "OHARA": "S-LAL18"
+        },
+        {
+            "SCHOTT": "N-LAK33B",
+            "CDGM": "H-LAK53B",
+            "OHARA": "S-YGH51"
+        },
+        {
+            "CDGM": "H-LAK54",
+            "OHARA": "S-LAL59"
+        },
+        {
+            "SCHOTT": "N-LAK9",
+            "CDGM": "H-LAK59A",
+            "OHARA": "S-LAL9"
+        },
+        {
+            "SCHOTT": "N-LAKN12",
+            "CDGM": "H-LAK5A",
+            "OHARA": "S-LAL12"
+        },
+        {
+            "CDGM": "H-LAK61",
+            "OHARA": "S-LAL61"
+        },
+        {
+            "CDGM": "H-LAK67",
+            "OHARA": "S-LAL53"
+        },
+        {
+            "SCHOTT": "N-LAK13",
+            "CDGM": "H-LAK6A",
+            "OHARA": "S-LAL13"
+        },
+        {
+            "SCHOTT": "N-LAK8",
+            "CDGM": "H-LAK7A",
+            "OHARA": "S-LAL8"
+        },
+        {
+            "SCHOTT": "N-LAK10",
+            "CDGM": "H-LAK8A",
+            "OHARA": "S-LAL10"
+        },
+        {
+            "CDGM": "H-QF1",
+            "OHARA": "S-TIL1"
+        },
+        {
+            "CDGM": "H-QF14",
+            "OHARA": "S-TIM8"
+        },
+        {
+            "CDGM": "H-QF3",
+            "OHARA": "S-TIL27"
+        },
+        {
+            "CDGM": "H-QF50A",
+            "OHARA": "S-TIL25"
+        },
+        {
+            "CDGM": "H-QF56",
+            "OHARA": "S-TIL26"
+        },
+        {
+            "SCHOTT": "N-LLF6",
+            "CDGM": "H-QF6A",
+            "OHARA": "S-TIL6"
+        },
+        {
+            "CDGM": "H-QF8",
+            "OHARA": "S-TIL2"
+        },
+        {
+            "CDGM": "H-QK1"
+        },
+        {
+            "SCHOTT": "N-FK5",
+            "CDGM": "H-QK3L",
+            "OHARA": "S-FSL5"
+        },
+        {
+            "SCHOTT": "N-KZFS4",
+            "CDGM": "H-TF3L",
+            "OHARA": "S-NBM51"
+        },
+        {
+            "SCHOTT": "N-KZFS5",
+            "CDGM": "H-TF5",
+            "OHARA": "S-NBH5"
+        },
+        {
+            "SCHOTT": "N-KZFS8",
+            "CDGM": "H-TF8",
+            "OHARA": "S-NBH8"
+        },
+        {
+            "SCHOTT": "N-SSK2",
+            "CDGM": "H-ZBAF1",
+            "OHARA": "S-BSM22"
+        },
+        {
+            "SCHOTT": "N-BAFN11",
+            "CDGM": "H-ZBAF16",
+            "OHARA": "S-BAH11"
+        },
+        {
+            "SCHOTT": "N-BASF52",
+            "CDGM": "H-ZBAF20",
+            "OHARA": "S-BAH27"
+        },
+        {
+            "CDGM": "H-ZBAF21",
+            "OHARA": "S-BAH28"
+        },
+        {
+            "CDGM": "H-ZBAF3"
+        },
+        {
+            "SCHOTT": "N-BASF2",
+            "CDGM": "H-ZBAF4"
+        },
+        {
+            "CDGM": "H-ZBAF5"
+        },
+        {
+            "SCHOTT": "N-SSK5",
+            "CDGM": "H-ZBAF50",
+            "OHARA": "S-BSM25"
+        },
+        {
+            "SCHOTT": "N-BAF10",
+            "CDGM": "H-ZBAF52",
+            "OHARA": "S-BAH10"
+        },
+        {
+            "SCHOTT": "N-SF2",
+            "CDGM": "H-ZF1",
+            "OHARA": "S-TIM22"
+        },
+        {
+            "SCHOTT": "N-SF8",
+            "CDGM": "H-ZF10",
+            "OHARA": "S-TIM28"
+        },
+        {
+            "SCHOTT": "N-SF15",
+            "CDGM": "H-ZF11",
+            "OHARA": "S-TIM35"
+        },
+        {
+            "SCHOTT": "N-SF14",
+            "CDGM": "H-ZF12",
+            "OHARA": "S-TIH14"
+        },
+        {
+            "SCHOTT": "N-SF11",
+            "CDGM": "H-ZF13",
+            "OHARA": "S-TIH11"
+        },
+        {
+            "SCHOTT": "N-SF11HT",
+            "CDGM": "H-ZF13GT"
+        },
+        {
+            "SCHOTT": "N-SF5",
+            "CDGM": "H-ZF2",
+            "OHARA": "S-TIM25"
+        },
+        {
+            "SCHOTT": "N-SF1",
+            "CDGM": "H-ZF3",
+            "OHARA": "S-TIH1"
+        },
+        {
+            "CDGM": "H-ZF39",
+            "OHARA": "S-TIM39"
+        },
+        {
+            "SCHOTT": "N-SF10",
+            "CDGM": "H-ZF4A",
+            "OHARA": "S-TIH10"
+        },
+        {
+            "CDGM": "H-ZF4AGT"
+        },
+        {
+            "CDGM": "H-ZF5",
+            "OHARA": "S-TIH3"
+        },
+        {
+            "CDGM": "H-ZF50",
+            "OHARA": "S-TIH13"
+        },
+        {
+            "SCHOTT": "N-SF57",
+            "CDGM": "H-ZF52",
+            "OHARA": "S-TIH53"
+        },
+        {
+            "SCHOTT": "N-SF57HT",
+            "CDGM": "H-ZF52GT",
+            "OHARA": "S-TIH53W"
+        },
+        {
+            "SCHOTT": "N-SF57HTultra",
+            "CDGM": "H-ZF52TT"
+        },
+        {
+            "SCHOTT": "N-SF4",
+            "CDGM": "H-ZF6",
+            "OHARA": "S-TIH4"
+        },
+        {
+            "SCHOTT": "N-SF66",
+            "CDGM": "H-ZF62"
+        },
+        {
+            "SCHOTT": "N-SF66",
+            "CDGM": "H-ZF62GT"
+        },
+        {
+            "CDGM": "H-ZF71",
+            "OHARA": "S-NPH1"
+        },
+        {
+            "CDGM": "H-ZF72A",
+            "OHARA": "S-NPH2"
+        },
+        {
+            "CDGM": "H-ZF72GT"
+        },
+        {
+            "SCHOTT": "N-SF6",
+            "CDGM": "H-ZF7LA",
+            "OHARA": "S-TIH6"
+        },
+        {
+            "SCHOTT": "N-SF6HT",
+            "CDGM": "H-ZF7LAGT"
+        },
+        {
+            "CDGM": "H-ZF8"
+        },
+        {
+            "CDGM": "H-ZF88"
+        },
+        {
+            "CDGM": "H-ZF88GT"
+        },
+        {
+            "SCHOTT": "N-PSK2",
+            "CDGM": "H-ZK1",
+            "OHARA": "S-BAL22"
+        },
+        {
+            "CDGM": "H-ZK10"
+        },
+        {
+            "SCHOTT": "N-SK10",
+            "CDGM": "H-ZK10L",
+            "OHARA": "S-BSM10"
+        },
+        {
+            "SCHOTT": "N-SK18",
+            "CDGM": "H-ZK11",
+            "OHARA": "S-BSM18"
+        },
+        {
+            "SCHOTT": "N-SK14",
+            "CDGM": "H-ZK14",
+            "OHARA": "S-BSM14"
+        },
+        {
+            "SCHOTT": "SK12",
+            "CDGM": "H-ZK2",
+            "OHARA": "S-BAL42"
+        },
+        {
+            "SCHOTT": "SSK1",
+            "CDGM": "H-ZK20",
+            "OHARA": "BSM21"
+        },
+        {
+            "SCHOTT": "N-SK15",
+            "CDGM": "H-ZK21",
+            "OHARA": "S-BSM15"
+        },
+        {
+            "SCHOTT": "N-SK5",
+            "CDGM": "H-ZK3",
+            "OHARA": "S-BAL35"
+        },
+        {
+            "SCHOTT": "N-SK5",
+            "CDGM": "H-ZK3A",
+            "OHARA": "S-BAL35"
+        },
+        {
+            "SCHOTT": "N-SK3",
+            "CDGM": "H-ZK4",
+            "OHARA": "S-BSM3"
+        },
+        {
+            "SCHOTT": "SK8",
+            "CDGM": "H-ZK5",
+            "OHARA": "CK8"
+        },
+        {
+            "SCHOTT": "N-SK2",
+            "CDGM": "H-ZK50",
+            "OHARA": "S-BSM2"
+        },
+        {
+            "SCHOTT": "N-SK2HT",
+            "CDGM": "H-ZK50GT"
+        },
+        {
+            "SCHOTT": "N-SK4",
+            "CDGM": "H-ZK6",
+            "OHARA": "S-BSM4"
+        },
+        {
+            "CDGM": "H-ZK7"
+        },
+        {
+            "SCHOTT": "N-SK9",
+            "CDGM": "H-ZK8",
+            "OHARA": "S-BSM9"
+        },
+        {
+            "SCHOTT": "N-SK16",
+            "CDGM": "H-ZK9B",
+            "OHARA": "S-BSM16"
+        },
+        {
+            "SCHOTT": "N-LASF11",
+            "CDGM": "H-ZLAF1"
+        },
+        {
+            "SCHOTT": "N-LASF1",
+            "CDGM": "H-ZLAF2A",
+            "OHARA": "S-LAH62"
+        },
+        {
+            "SCHOTT": "N-LASF13",
+            "CDGM": "H-ZLAF3"
+        },
+        {
+            "CDGM": "H-ZLAF4LA"
+        },
+        {
+            "SCHOTT": "N-LASF44",
+            "CDGM": "H-ZLAF50D ",
+            "OHARA": "S-LAH65"
+        },
+        {
+            "SCHOTT": "N-LASF44",
+            "CDGM": "H-ZLAF50E",
+            "OHARA": "S-LAH65"
+        },
+        {
+            "CDGM": "H-ZLAF51",
+            "OHARA": "S-LAH63"
+        },
+        {
+            "SCHOTT": "N-LASF43",
+            "CDGM": "H-ZLAF52",
+            "OHARA": "S-LAH53"
+        },
+        {
+            "SCHOTT": "N-LASF43",
+            "CDGM": "H-ZLAF52A",
+            "OHARA": "S-LAH53"
+        },
+        {
+            "SCHOTT": "N-LASF40",
+            "CDGM": "H-ZLAF53B",
+            "OHARA": "S-LAH60"
+        },
+        {
+            "CDGM": "H-ZLAF53BGT"
+        },
+        {
+            "SCHOTT": "N-LASF41",
+            "CDGM": "H-ZLAF55C",
+            "OHARA": "S-LAH55"
+        },
+        {
+            "SCHOTT": "N-LASF41",
+            "CDGM": "H-ZLAF55D",
+            "OHARA": "S-LAH55"
+        },
+        {
+            "CDGM": "H-ZLAF56B"
+        },
+        {
+            "SCHOTT": "N-LASF45",
+            "CDGM": "H-ZLAF66",
+            "OHARA": "S-LAM66"
+        },
+        {
+            "SCHOTT": "N-LASF45HT",
+            "CDGM": "H-ZLAF66GT"
+        },
+        {
+            "SCHOTT": "N-LASF31",
+            "CDGM": "H-ZLAF68C",
+            "OHARA": "S-LAH58"
+        },
+        {
+            "CDGM": "H-ZLAF68N"
+        },
+        {
+            "CDGM": "H-ZLAF69",
+            "OHARA": "S-LAH59"
+        },
+        {
+            "CDGM": "H-ZLAF69A",
+            "OHARA": "S-LAH59"
+        },
+        {
+            "CDGM": "H-ZLAF71",
+            "OHARA": "S-LAH71"
+        },
+        {
+            "SCHOTT": "N-LASF9HT",
+            "CDGM": "H-ZLAF71AGT"
+        },
+        {
+            "SCHOTT": "N-LASF46",
+            "CDGM": "H-ZLAF75A"
+        },
+        {
+            "SCHOTT": "N-LASF46",
+            "CDGM": "H-ZLAF75B"
+        },
+        {
+            "CDGM": "H-ZLAF76",
+            "OHARA": "S-NBH57"
+        },
+        {
+            "CDGM": "H-ZLAF78B"
+        },
+        {
+            "CDGM": "H-ZLAF89L",
+            "OHARA": "S-LaH98"
+        },
+        {
+            "CDGM": "H-ZLAF90"
+        },
+        {
+            "CDGM": "H-ZLaF92",
+            "OHARA": "S-LAH79"
+        },
+        {
+            "CDGM": "H-ZPK12",
+            "OHARA": "S-FPM2"
+        },
+        {
+            "SCHOTT": "N-PSK53A",
+            "CDGM": "H-ZPK1A",
+            "OHARA": "S-PHM52"
+        },
+        {
+            "CDGM": "H-ZPK2A",
+            "OHARA": "S-PHM53"
+        },
+        {
+            "CDGM": "H-ZPK3"
+        },
+        {
+            "CDGM": "H-ZPK5"
+        },
+        {
+            "CDGM": "H-ZPK7"
+        },
+        {
+            "SCHOTT": "ZKN7",
+            "CDGM": "K4A",
+            "OHARA": "ZSL7"
+        },
+        {
+            "SCHOTT": "LF3",
+            "CDGM": "QF5",
+            "OHARA": "PBL23"
+        },
+        {
+            "CDGM": "TF3"
+        },
+        {
+            "SCHOTT": "BASF6",
+            "CDGM": "ZBAF17",
+            "OHARA": "BAH26"
+        },
+        {
+            "SCHOTT": "SF2",
+            "CDGM": "ZF1",
+            "OHARA": "PBM22"
+        },
+        {
+            "SCHOTT": "SF8",
+            "CDGM": "ZF10",
+            "OHARA": "PBM28"
+        },
+        {
+            "SCHOTT": "SF15",
+            "CDGM": "ZF11",
+            "OHARA": "PBM35"
+        },
+        {
+            "SCHOTT": "SF14",
+            "CDGM": "ZF12",
+            "OHARA": "PBH14"
+        },
+        {
+            "SCHOTT": "SF11",
+            "CDGM": "ZF13",
+            "OHARA": "PBH11"
+        },
+        {
+            "SCHOTT": "SF5",
+            "CDGM": "ZF2",
+            "OHARA": "PBM25"
+        },
+        {
+            "SCHOTT": "SF1",
+            "CDGM": "ZF3",
+            "OHARA": "PBH1"
+        },
+        {
+            "SCHOTT": "SF10",
+            "CDGM": "ZF4",
+            "OHARA": "PBH10"
+        },
+        {
+            "SCHOTT": "SF3",
+            "CDGM": "ZF5",
+            "OHARA": "PBH3"
+        },
+        {
+            "SCHOTT": "SF13",
+            "CDGM": "ZF50",
+            "OHARA": "PBH13"
+        },
+        {
+            "SCHOTT": "SF56",
+            "CDGM": "ZF51",
+            "OHARA": "PBH23"
+        },
+        {
+            "SCHOTT": "SF57",
+            "CDGM": "ZF52",
+            "OHARA": "PBH53"
+        },
+        {
+            "SCHOTT": "SF4",
+            "CDGM": "ZF6",
+            "OHARA": "PBH4"
+        },
+        {
+            "SCHOTT": "SF6",
+            "CDGM": "ZF7L",
+            "OHARA": "PBH6"
+        },
+        {
+            "SCHOTT": "SF9",
+            "CDGM": "ZF8",
+            "OHARA": "PBM29"
+        },
+        {
+            "SCHOTT": "SK2",
+            "CDGM": "ZK50",
+            "OHARA": "BSM2"
+        }
+    ]
+}

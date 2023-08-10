@@ -17,7 +17,7 @@ const server = express()
 const port = 3000
 
 const secret = require('./secret.js'); // Importowanie poufnych danych, takich jak nazwa użytkownika i hasło do bazy danych
-const glasses = require('./data_files/glasses.json'); // Importowanie danych dotyczących szkieł
+const glasses = require('./data_files/glasses_grouped.json'); // Importowanie danych dotyczących szkieł
 
 // Konfiguracja połączenia do bazy danych
 const config = {
@@ -410,7 +410,8 @@ server.get('/product-orders/:code', async (req, res) => {
             ELSE 'FAŁSZ'
         END AS zakończone,
         nag.ZaN_DokumentObcy AS Bestellung,
-        atr.Atr_Wartosc AS Klient
+        atr.Atr_Wartosc AS Klient,
+        'ZS/' + nag.ZaN_ZamSeria + '/' + CAST(nag.ZaN_ZamNumer AS NVARCHAR) + '/' + CAST(nag.ZaN_ZamRok AS NVARCHAR) AS NrZamówienia
         FROM cdn.ZamElem AS elem
         LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
         LEFT JOIN cdn.TraElem As traelem ON elem.ZaE_TwrKod = traelem.TrE_TwrNazwa AND nag.ZaN_DokumentObcy = traelem.TrE_TwrNazwa
@@ -450,21 +451,35 @@ server.get('/product-description/:code', async (req, res) => {
 server.get('/product-sales/:code', async (req, res) => {
     const code = req.params.code;
     const query = `
-        SELECT
+    SELECT DISTINCT
         DATEFROMPARTS(nag.TrN_VatRok, nag.TrN_VatMiesiac, nag.TrN_VatDzien) As Data,
+        TrN_GIDNumer,
         elem.TrE_Ilosc As Ilość,
-        elem.TrE_WartoscPoRabacie / elem.TrE_Ilosc As Cena,
+        CASE
+            WHEN COALESCE(elem.TrE_Ilosc, 0) = 0 THEN 0
+            ELSE elem.TrE_WartoscPoRabacie / elem.TrE_Ilosc
+        END AS Cena,
         elem.TrE_WartoscPoRabacie AS Wartość,
         elem.TrE_TwrNazwa AS Bestellung,
-        atr.Atr_Wartosc AS Klient
-    FROM cdn.TraElem AS elem
-    LEFT JOIN cdn.TraNag AS nag ON elem.TrE_GIDNumer = nag.TrN_GIDNumer
-    LEFT JOIN cdn.atrybuty AS atr ON nag.TrN_GIDNumer = atr.Atr_ObiNumer AND atr.Atr_AtkId = 18
-    WHERE
-        elem.TrE_Twrkod = '${code}'
-    AND
-        elem.TrE_KntTyp = 32
-    ORDER BY Data DESC
+        atr.Atr_Wartosc AS Klient,
+        CASE
+            WHEN nag.TrN_TrNTyp = 20 THEN 'FSE-'
+            ELSE 'FS-'
+        END + nag.TrN_TrNSeria + '/' + CAST(nag.TrN_TrNNumer AS NVARCHAR) + '/' + CAST(nag.TrN_TrNRok AS NVARCHAR) AS NrFaktury
+      FROM
+        cdn.zamelem a
+        INNER JOIN cdn.zamnag b ON b.ZaN_GIDNumer=a.ZaE_GIDNumer
+        LEFT JOIN cdn.TraElem elem ON elem.TrE_TwrKod=a.ZaE_TwrKod AND b.Zan_DokumentObcy = elem.TrE_TwrNazwa
+        LEFT JOIN cdn.traNag nag ON nag.TrN_GIDTyp=elem.TrE_GIDTyp AND nag.TrN_GIDNumer=elem.TrE_GIDNumer
+        LEFT JOIN cdn.KntAdresy e ON e.KnA_GIDNumer= a.ZaE_KntNumer
+        LEFT JOIN cdn.atrybuty atr ON b.ZaN_GIDNumer=atr.Atr_ObiNumer
+        WHERE
+            elem.TrE_Twrkod = '${code}'
+        AND
+            elem.TrE_KntTyp = 32
+        AND
+            atr.Atr_AtkId = 18
+        ORDER BY Data DESC
     `;
 
     try {
@@ -519,6 +534,10 @@ server.get('/file/:id', async (req, res) => {
                     break;
                 case '.png':
                     contentType = 'image/png';
+                    break;
+                case '.xlsx':
+                case '.xls':
+                    contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                     break;
                 default:
                     res.status(400).send('Unsupported file format');
@@ -622,7 +641,7 @@ WITH ranked_rows AS (
     LEFT JOIN cdn.traNag d ON d.TrN_GIDTyp=c.TrE_GIDTyp AND d.TrN_GIDNumer=c.TrE_GIDNumer
     LEFT JOIN cdn.KntAdresy e ON e.KnA_GIDNumer= a.ZaE_KntNumer
     LEFT JOIN cdn.atrybuty f ON b.ZaN_GIDNumer=f.Atr_ObiNumer
-  WHERE f.Atr_AtkId = 18 AND f.Atr_Wartosc = @client
+  WHERE f.Atr_AtkId = 18 AND f.Atr_Wartosc = @client AND c.TrE_KntTyp = 32
 )
 SELECT
             Kod_Towaru,
@@ -700,9 +719,9 @@ function createWindow () {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
-        }
+        },
+        icon: __dirname + '/ikony/win/favicon.ico'
     })
-
     win.setMenuBarVisibility(false); // Ukrywanie paska menu
 
     // Ładowanie strony startowej

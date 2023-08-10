@@ -19,10 +19,10 @@ const app = Vue.createApp({
             productDescriptionSOD: '',  // opis wybranego produktu z sod
             ordersData: [],  // dane zamówień dla wybranego produktu
             filteredOrdersData: [],  // dane zamówień dla wybranego produktu po filtrowaniu
-            LensesOrdersColumns: ['Bestellung', 'Klient', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
+            LensesOrdersColumns: ['Bestellung', 'NrZamówienia', 'Klient', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
             salesData: [],  // dane sprzedaży dla wybranego produktu
             filteredSalesData: [],  // dane sprzedaży dla wybranego produktu po filtrowaniu
-            LensesSalesColumns: ['Bestellung', 'Klient', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
+            LensesSalesColumns: ['Bestellung', 'NrFaktury', 'Klient', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
             selectedStartDate: null,  // wybrana data początkowa
             selectedEndDate: null,  // wybrana data końcowa
             availableFiles: [],  // lista dostępnych plików
@@ -48,6 +48,9 @@ const app = Vue.createApp({
             glasses: [], // lista szkieł
             lenses: [], // lista soczewek
             LensesColumns: ['Soczewka'], // kolumny dla tabeli soczewek
+            manufacturers: ["SCHOTT", "CDGM", "OHARA"],  // Lista producentów
+            selectedManufacturer: "SCHOTT",
+            m: null,
         }
     },
     watch: {
@@ -130,6 +133,8 @@ const app = Vue.createApp({
     },
     created() {
         this.fetchData();  // Pobierz dane na początku
+    },
+    mounted() {
         this.getGlasses();
     },
     methods: {
@@ -152,6 +157,12 @@ const app = Vue.createApp({
             if (!value || isNaN(value)) return '-';
             const num = parseFloat(value);
             return num.toLocaleString('pl-PL', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        },
+        // Metoda do formatowania liczb całkowitych
+        formatNumberInt(value) {
+            if (!value || isNaN(value)) return '-';
+            const num = parseInt(value);
+            return num.toLocaleString('pl-PL', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         },
         // Aktualizacja kolumn
         updateColumns() {
@@ -402,6 +413,7 @@ const app = Vue.createApp({
         },
         // Funkcja do odczytu soczewek na podstawie szkła
         async getLenses() {
+            this.lenses = [];
             try {
                 const response = await axios.get(`http://localhost:3000/sod-lens-from-glass/${this.glassSearch}`)
                 this.lenses = response.data
@@ -412,13 +424,21 @@ const app = Vue.createApp({
         // Funkcja do odczytu szkieł
         async getGlasses(){
             try {
-                const response = await axios.get(`http://localhost:3000/glasses`)
-                this.glasses = response.data.glasses
-                console.log(this.glasses)
+                const response = await axios.get(`http://localhost:3000/glasses`);
+                this.glasses = response.data.glasses;
             } catch (err) {
-                console.error(err)
+                console.error(err);
             }
         },
+        glassOptionText(glass) {
+            let text = glass[this.selectedManufacturer];
+            this.manufacturers.forEach(m => {
+                if (m !== this.selectedManufacturer && glass[m]) {
+                    text += ` (${m}: ${glass[m]})`;
+                }
+            });
+            return text;
+        }
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn
@@ -500,6 +520,10 @@ const app = Vue.createApp({
         },
         filteredGlasses() {
             return this.glasses.filter(glass => glass.toLowerCase().includes(this.glassFilter.toLowerCase()));
+        },
+        filteredGlassesByManufacturer() {
+            console.log(this.glasses.filter(glass => glass[this.selectedManufacturer]));
+            return this.glasses.filter(glass => glass[this.selectedManufacturer]);
         }
     }
 })

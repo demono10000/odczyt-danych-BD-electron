@@ -341,6 +341,7 @@
                 <tbody>
                 <tr v-for="row in filteredOrdersData" :class="{ 'order-completed': row.zakończone === 'PRAWDA' }">
                     <td>{{ row['Bestellung'] || '-' }}</td>
+                    <td>{{ row['NrZamówienia'] || '-' }}</td>
                     <td class="clickable" @click="showClient(row['Klient'])">{{ row['Klient'] || '-' }}</td>
                     <td>{{ formatDate(row['Data']) || '-' }}</td>
                     <td>{{ row['Ilość'] || '-' }}</td>
@@ -352,7 +353,8 @@
                     <td>Suma</td>
                     <td>-</td>
                     <td>-</td>
-                    <td>{{ formatNumber(ordersTotal.Ilość) || '-' }}</td>
+                    <td>-</td>
+                    <td>{{ formatNumberInt(ordersTotal.Ilość) || '-' }}</td>
                     <td>-</td>
                     <td>{{ formatCurrency(ordersTotal.Wartość) || '-' }}</td>
                 </tr>
@@ -380,6 +382,7 @@
                 <tbody>
                 <tr v-for="row in filteredSalesData">
                     <td>{{ row['Bestellung'] || '-' }}</td>
+                    <td>{{ row['NrFaktury'] || '-' }}</td>
                     <td class="clickable" @click="showClient(row['Klient'])">{{ row['Klient'] || '-' }}</td>
                     <td>{{ formatDate(row.Data) }}</td>
                     <td>{{ row.Ilość }}</td>
@@ -391,7 +394,8 @@
                     <td>Suma</td>
                     <td>-</td>
                     <td>-</td>
-                    <td>{{ formatNumber(salesTotal.Ilość) || '-' }}</td>
+                    <td>-</td>
+                    <td>{{ formatNumberInt(salesTotal.Ilość) || '-' }}</td>
                     <td>-</td>
                     <td>{{ formatCurrency(salesTotal.Wartość) || '-' }}</td>
                 </tr>
@@ -446,14 +450,30 @@
     <div v-show="selectedTab === 'glass'">
         <div class="panel-container">
             <div class="filter-panel">
-                <label for="client">Wybierz szkło: </label>
-                <select id="client" v-model="selectedGlass">
-                    <option v-for="glass in filteredGlasses" :value="glass" :key="glass">{{ glass }}</option>
+                <!-- Wybór producenta szkła -->
+                <label for="manufacturer">Wybierz producenta: </label>
+                <select id="manufacturer" v-model="selectedManufacturer">
+                    <option v-for="manufacturer in manufacturers" :value="manufacturer" :key="manufacturer">{{ manufacturer }}</option>
                 </select>
+
+                <!-- Wybór szkła -->
+                <label for="glass">Wybierz szkło: </label>
+                <select id="glass" v-model="selectedGlass">
+                    <option
+                            v-for="glass in filteredGlassesByManufacturer"
+                            :value="glass[selectedManufacturer]"
+                            :key="glass[selectedManufacturer]"
+                    >
+                        {{ glassOptionText(glass) }}
+                    </option>
+                </select>
+
+                <!-- Filtry -->
                 <input type="text" v-model="glassFilter" placeholder="Filtruj liste szkła..." />
                 <input type="text" v-model="glassSearch" placeholder="Znajdź szkło..." />
             </div>
         </div>
+
         <table>
             <thead>
             <tr>
