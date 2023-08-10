@@ -462,7 +462,7 @@
                     <option
                             v-for="glass in filteredGlassesByManufacturer"
                             :value="glass[selectedManufacturer]"
-                            :key="glass[selectedManufacturer]"
+                            :key="glass"
                     >
                         {{ glassOptionText(glass) }}
                     </option>

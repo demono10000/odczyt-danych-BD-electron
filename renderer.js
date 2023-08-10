@@ -335,6 +335,7 @@ const app = Vue.createApp({
             isWeek = column === 'Tydzień';
             isMonthYearFormat = column === 'Miesiąc_Rok';
             isWeekYearFormat = column === 'Tydzień_Rok';
+            isDocumentNumber = (column === 'NrZamówienia' || column === 'NrFaktury');
             if (column === 'Miesiąc' || column === 'Tydzień' || column === 'Rok' || column === 'Miesiąc_Rok' || column === 'Tydzień_Rok') {
                 column = 'period';
             }
@@ -362,6 +363,26 @@ const app = Vue.createApp({
                     const dateA = new Date(yearA, 0, 1 + (weekA - 1) * 7);
                     const dateB = new Date(yearB, 0, 1 + (weekB - 1) * 7);
                     return this.sort.ascending ? dateA - dateB : dateB - dateA;
+                } else if (isDocumentNumber) {
+                    const slashesCount = valueA.split('/').length - 1;
+                    let numberA, yearA, numberB, yearB;
+                    if (slashesCount === 3) {
+                        [ , , numberA, yearA] = valueA.split('/');
+                        [ , , numberB, yearB] = valueB.split('/');
+                    } else {
+                        [ , numberA, yearA] = valueA.split('/');
+                        [ , numberB, yearB] = valueB.split('/');
+                    }
+
+                    numberA = Number(numberA);
+                    yearA = Number(yearA);
+                    numberB = Number(numberB);
+                    yearB = Number(yearB);
+
+                    if (yearA === yearB) {
+                        return this.sort.ascending ? numberA - numberB : numberB - numberA;
+                    }
+                    return this.sort.ascending ? yearA - yearB : yearB - yearA;
                 }
 
                 // Próbuj zamienić na liczbę; jeśli się nie uda, użyj oryginalnej wartości
@@ -518,12 +539,8 @@ const app = Vue.createApp({
         filteredClients() {
             return this.clients.filter(client => client.Atr_Wartosc.toLowerCase().includes(this.clientFilter.toLowerCase()));
         },
-        filteredGlasses() {
-            return this.glasses.filter(glass => glass.toLowerCase().includes(this.glassFilter.toLowerCase()));
-        },
         filteredGlassesByManufacturer() {
-            console.log(this.glasses.filter(glass => glass[this.selectedManufacturer]));
-            return this.glasses.filter(glass => glass[this.selectedManufacturer]);
+            return this.glasses.filter(glass => glass[this.selectedManufacturer] && glass[this.selectedManufacturer].toLowerCase().includes(this.glassFilter.toLowerCase()));
         }
     }
 })
