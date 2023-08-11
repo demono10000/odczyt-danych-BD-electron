@@ -85,7 +85,7 @@
             gap: 10px;
         }
 
-        .filter-panel select, .filter-panel input[type="text"], .filter-panel input[type="date"] {
+        .filter-panel select, .filter-panel input[type="text"], .filter-panel input[type="date"], .filter-panel input[type="number"] {
             width: 100%;
             padding: 12px 20px;
             margin: 8px 0;
@@ -175,11 +175,35 @@
         #search:hover {
             background-color: dodgerblue;
         }
+
         td.centered {
             text-align: center;
         }
+
         th.centered {
              text-align: center;
+        }
+
+        .button {
+            background: deepskyblue;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s; /* dodane dla płynnego efektu */
+        }
+
+        .button:hover {
+            background: dodgerblue;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transform: scale(1.02);
         }
 
     </style>
@@ -194,6 +218,7 @@
         <button v-bind:class="{ active: selectedTab === 'lenses' }" v-on:click="selectedTab = 'lenses'">Soczewki</button>
         <button v-bind:class="{ active: selectedTab === 'client' }" v-on:click="selectedTab = 'client'">Klient</button>
         <button v-bind:class="{ active: selectedTab === 'glass' }" v-on:click="selectedTab = 'glass'">Szkło</button>
+        <button v-bind:class="{ active: selectedTab === 'najnaj' }" v-on:click="selectedTab = 'najnaj'">NAJNAJ</button>
     </div>
     <div v-show="selectedTab === 'sales' || selectedTab === 'orders'">
         <div>
@@ -492,6 +517,41 @@
             <tbody>
             <tr v-for="row in lenses" :key="row.Soczewka">
                 <td class="clickable centered" @click="showLens(row['Soczewka'])">{{ row['Soczewka'] || '-' }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div v-show="selectedTab === 'najnaj'">
+        <div class="panel-container">
+            <div class="filter-panel">
+                <label for="startDate">Data początkowa: </label>
+                <input type="date" id="startDate" v-model="selectedStartDate">
+                <label for="endDate">Data końcowa: </label>
+                <input type="date" id="endDate" v-model="selectedEndDate">
+                <input type="text" v-model="glassSearch" placeholder="Filtruj szkło..." />
+                <input type="number" v-model="minOrdersFilter" placeholder="Filtruj minimalną liczbę zamówień..." />
+            </div>
+            <button class="button" @click="getNajnaj()">Szukaj</button>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th class="clickableLight centered" v-for="column in najnajColumns" :key="column" @click="sortByColumn(column, 'najnaj')">
+                    {{ column }}
+                    <span v-if="sort.column === column">
+                            <span v-if="sort.ascending">↑</span>
+                            <span v-else>↓</span>
+                         </span>
+                    <span v-else>
+                            <span>↑</span><span>↓</span>
+                        </span>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="row in najnaj" :key="najnaj.Kod_Towaru">
+                <td class="clickable centered" @click="showLens(row['Kod_Towaru'])">{{ row['Kod_Towaru'] || '-' }}</td>
+                <td>{{ row['Zamówienia'] || '-' }}</td>
             </tr>
             </tbody>
         </table>

@@ -51,6 +51,9 @@ const app = Vue.createApp({
             manufacturers: ["SCHOTT", "CDGM", "OHARA"],  // Lista producentów
             selectedManufacturer: "SCHOTT",
             m: null,
+            minOrdersFilter: null,
+            najnajColumns: ['Kod_Towaru', 'Zamówienia'],
+            najnaj: [],
         }
     },
     watch: {
@@ -328,6 +331,8 @@ const app = Vue.createApp({
                 this.sortTable(this.transformedData, column)
             } else if (table === 'glass') {
                 this.sortTable(this.lenses, column)
+            } else if (table === 'najnaj') {
+                this.sortTable(this.najnaj, column)
             }
         },
         sortTable(data, column) {
@@ -459,7 +464,24 @@ const app = Vue.createApp({
                 }
             });
             return text;
-        }
+        },
+        // Funkcja do odczytu zakładki najnaj
+        async getNajnaj() {
+            this.najnaj = [];
+            try {
+                const queryParams = {
+                    startDate: this.selectedStartDate,
+                    endDate: this.selectedEndDate,
+                    glassName: this.glassSearch,
+                    minOrders: this.minOrdersFilter
+                };
+
+                const response = await axios.get(`http://localhost:3000/lenses-most-ordered`, { params: queryParams });
+                this.najnaj = response.data;
+            } catch (err) {
+                console.error(err);
+            }
+        },
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn

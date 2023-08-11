@@ -696,6 +696,78 @@ server.get('/sod-lens-from-glass/:code', async (req, res) => {
 server.get('/glasses', async (req, res) => {
     return res.json(glasses);
 });
+// Odczyt najczęstszych zamówień
+server.get('/lenses-most-ordered', async (req, res) => {
+    const startDate = req.query.startDate || null;
+    const endDate = req.query.endDate || null;
+    const glassName = req.query.glassName || null;
+    const minOrders = req.query.minOrders || null;
+
+    const request = new sql.Request(pool);
+    let lensCodesFilter = '';
+    let dateFilter = '';
+    let minOrderFilter = '';
+
+    if (startDate && endDate) {
+        dateFilter = `AND DATEADD(day, b.ZaN_DataWystawienia-36163, '1900-01-01') BETWEEN @startDate AND @endDate`;
+        request.input('startDate', sql.Date, new Date(startDate));
+        request.input('endDate', sql.Date, new Date(endDate));
+    }
+
+    if (minOrders) {
+        minOrderFilter = `HAVING COUNT(*) >= @minOrders`;
+        request.input('minOrders', sql.Int, parseInt(minOrders));
+    }
+
+    if (glassName) {
+        const glassQuery = `
+            SELECT 
+            CASE
+                WHEN CHARINDEX(CHAR(10), CAST(OPIS AS varchar(max))) > 0
+                THEN LEFT(CAST(OPIS AS varchar(max)), CHARINDEX(CHAR(10), CAST(OPIS AS varchar(max))) - 1)
+                ELSE CAST(OPIS AS varchar(max))
+            END AS Soczewka
+            FROM SPRAWA
+            WHERE OPIS LIKE '%${glassName}%'
+        `;
+
+        const lensesFromGlass = await poolSOD.query(glassQuery);
+        if (lensesFromGlass.recordset.length === 0) {
+            return res.json([]); // No results for the given glass
+        }
+
+        const lensCodes = lensesFromGlass.recordset
+            .map(lens => `'${lens.Soczewka.trim()}'`)
+            .join(',');
+        lensCodesFilter = `AND a.ZaE_TwrKod IN (${lensCodes})`;
+    }
+
+    let baseQuery = `
+        WITH lens_orders AS (
+            SELECT DISTINCT
+                a.ZaE_TwrKod AS Kod_Towaru,
+                ZaN_DokumentObcy,
+                b.ZaN_ZamNumer
+            FROM cdn.zamelem a
+            INNER JOIN cdn.zamnag b ON b.ZaN_GIDNumer = a.ZaE_GIDNumer
+            LEFT JOIN cdn.TraElem c ON c.TrE_TwrKod = a.ZaE_TwrKod AND b.Zan_DokumentObcy = c.TrE_TwrNazwa
+            WHERE 1=1 ${lensCodesFilter} ${dateFilter}
+        )
+        SELECT Kod_Towaru, COUNT(*) AS Zamówienia
+        FROM lens_orders
+        GROUP BY Kod_Towaru
+        ${minOrderFilter}
+        ORDER BY Zamówienia DESC
+    `;
+
+    try {
+        const result = await request.query(baseQuery);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
 
 
 // Uruchomienie serwera
