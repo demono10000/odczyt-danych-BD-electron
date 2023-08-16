@@ -399,7 +399,7 @@ server.get('/products', async (req, res) => {
 server.get('/product-orders/:code', async (req, res) => {
     const code = req.params.code;
     const query = `
-        SELECT
+    SELECT
         DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01') As Data,
         elem.ZaE_Ilosc As Ilość,
         elem.ZaE_cenaUzgodniona As Cena,
@@ -410,12 +410,20 @@ server.get('/product-orders/:code', async (req, res) => {
             ELSE 'FAŁSZ'
         END AS zakończone,
         nag.ZaN_DokumentObcy AS Bestellung,
-        atr.Atr_Wartosc AS Klient,
-        'ZS/' + nag.ZaN_ZamSeria + '/' + CAST(nag.ZaN_ZamNumer AS NVARCHAR) + '/' + CAST(nag.ZaN_ZamRok AS NVARCHAR) AS NrZamówienia
-        FROM cdn.ZamElem AS elem
-        LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
-        LEFT JOIN cdn.TraElem As traelem ON elem.ZaE_TwrKod = traelem.TrE_TwrNazwa AND nag.ZaN_DokumentObcy = traelem.TrE_TwrNazwa
-        LEFT JOIN cdn.atrybuty AS atr ON nag.ZaN_GIDNumer = atr.Atr_ObiNumer AND atr.Atr_AtkId = 18
+        atr18.Atr_Wartosc AS Klient,
+        'ZS/' + nag.ZaN_ZamSeria + '/' + CAST(nag.ZaN_ZamNumer AS NVARCHAR) + '/' + CAST(nag.ZaN_ZamRok AS NVARCHAR) AS NrZamówienia,
+        atr27.Atr_Wartosc AS cnc_frez,
+        atr28.Atr_Wartosc AS cnc_poler,
+        atr29.Atr_Wartosc AS cnc_centr,
+        atr44.Atr_Wartosc AS powłoka
+    FROM cdn.ZamElem AS elem
+    LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
+    LEFT JOIN cdn.TraElem As traelem ON elem.ZaE_TwrKod = traelem.TrE_TwrNazwa AND nag.ZaN_DokumentObcy = traelem.TrE_TwrNazwa
+    LEFT JOIN cdn.atrybuty AS atr18 ON nag.ZaN_GIDNumer = atr18.Atr_ObiNumer AND atr18.Atr_AtkId = 18
+    LEFT JOIN cdn.atrybuty AS atr27 ON nag.ZaN_GIDNumer = atr27.Atr_ObiNumer AND atr27.Atr_AtkId = 27
+    LEFT JOIN cdn.atrybuty AS atr28 ON nag.ZaN_GIDNumer = atr28.Atr_ObiNumer AND atr28.Atr_AtkId = 28
+    LEFT JOIN cdn.atrybuty AS atr29 ON nag.ZaN_GIDNumer = atr29.Atr_ObiNumer AND atr29.Atr_AtkId = 29
+    LEFT JOIN cdn.atrybuty AS atr44 ON nag.ZaN_GIDNumer = atr44.Atr_ObiNumer AND atr44.Atr_AtkId = 44
         WHERE elem.ZaE_Twrkod = '${code}'
         ORDER BY data DESC
     `;

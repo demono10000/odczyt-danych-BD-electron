@@ -368,6 +368,10 @@
                     <td>{{ row['Bestellung'] || '-' }}</td>
                     <td>{{ row['NrZamówienia'] || '-' }}</td>
                     <td class="clickable" @click="showClient(row['Klient'])">{{ row['Klient'] || '-' }}</td>
+                    <td>{{ row['cnc_frez'] || '-' }}</td>
+                    <td>{{ row['cnc_poler'] || '-' }}</td>
+                    <td>{{ row['cnc_centr'] || '-' }}</td>
+                    <td>{{ row['powłoka'] || '-' }}</td>
                     <td>{{ formatDate(row['Data']) || '-' }}</td>
                     <td>{{ row['Ilość'] || '-' }}</td>
                     <td>{{ formatCurrency(row['Cena']) || '-' }}</td>
@@ -376,6 +380,10 @@
                 <!-- Wyświetlanie sumy -->
                 <tr class="total">
                     <td>Suma</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>

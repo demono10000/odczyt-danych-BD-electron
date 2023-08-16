@@ -19,7 +19,7 @@ const app = Vue.createApp({
             productDescriptionSOD: '',  // opis wybranego produktu z sod
             ordersData: [],  // dane zamówień dla wybranego produktu
             filteredOrdersData: [],  // dane zamówień dla wybranego produktu po filtrowaniu
-            LensesOrdersColumns: ['Bestellung', 'NrZamówienia', 'Klient', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
+            LensesOrdersColumns: ['Bestellung', 'NrZamówienia', 'Klient', 'cnc_frez', 'cnc_poler', 'cnc_centr', 'powłoka', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli zamówień
             salesData: [],  // dane sprzedaży dla wybranego produktu
             filteredSalesData: [],  // dane sprzedaży dla wybranego produktu po filtrowaniu
             LensesSalesColumns: ['Bestellung', 'NrFaktury', 'Klient', 'Data', 'Ilość', 'Cena', 'Wartość'],  // kolumny dla tabeli sprzedaży
