@@ -776,7 +776,35 @@ server.get('/lenses-most-ordered', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+// towary robione przez cnc
+server.get('/cnc-lenses', async (req, res) => {
+    const startDate = req.query.startDate || null;
+    const endDate = req.query.endDate || null;
 
+    const request = new sql.Request(pool);
+
+    let finalQuery = `
+    SELECT DISTINCT
+        elem.ZaE_Twrkod AS Kod_Towaru
+    FROM cdn.ZamElem AS elem
+    LEFT JOIN cdn.ZamNag AS nag ON elem.ZaE_GIDNumer = nag.ZaN_GIDNumer
+    LEFT JOIN cdn.atrybuty AS atr27 ON nag.ZaN_GIDNumer = atr27.Atr_ObiNumer AND atr27.Atr_AtkId = 27
+    WHERE atr27.Atr_Wartosc = 'TAK'
+    `;
+    if(startDate && endDate) {
+        finalQuery += ` AND DATEADD(day, ZaN_DataWystawienia-36163, '1900-01-01') BETWEEN @startDate AND @endDate`;
+        request.input('startDate', sql.Date, new Date(startDate));
+        request.input('endDate', sql.Date, new Date(endDate));
+    }
+
+    try {
+        const result = await request.query(finalQuery);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
 
 // Uruchomienie serwera
 server.listen(port, () => console.log(`Server listening at http://localhost:${port}`))

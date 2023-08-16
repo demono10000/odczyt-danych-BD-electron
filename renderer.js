@@ -54,6 +54,8 @@ const app = Vue.createApp({
             minOrdersFilter: null,
             najnajColumns: ['Kod_Towaru', 'Zamówienia'],
             najnaj: [],
+            cncColumns: ['Kod_Towaru'],
+            cnc: [],
         }
     },
     watch: {
@@ -82,6 +84,8 @@ const app = Vue.createApp({
                 this.fetchProducts();
             }else if (this.selectedTab === 'client') {
                 this.fetchClients();
+            }else if (this.selectedTab === 'cnc') {
+                this.getCnc();
             }
         },
         selectedProduct: {
@@ -99,17 +103,20 @@ const app = Vue.createApp({
         },
         selectedStartDate: function (newVal, oldVal) {
             this.filterData();
-            if (this.selectedTab === 'client') {
-                if (this.selectedStartDate && this.selectedEndDate) {
+            if (this.selectedStartDate && this.selectedEndDate) {
+                if (this.selectedTab === 'client') {
                     this.fetchClientTransactionsData();
+                } else if (this.selectedTab === 'cnc') {
+                    this.getCnc();
                 }
             }
         },
         selectedEndDate: function (newVal, oldVal) {
             this.filterData();
-            if (this.selectedTab === 'client') {
-                if (this.selectedStartDate && this.selectedEndDate) {
+                if (this.selectedStartDate && this.selectedEndDate) {if (this.selectedTab === 'client') {
                     this.fetchClientTransactionsData();
+                } else if (this.selectedTab === 'cnc') {
+                    this.getCnc();
                 }
             }
         },
@@ -333,6 +340,8 @@ const app = Vue.createApp({
                 this.sortTable(this.lenses, column)
             } else if (table === 'najnaj') {
                 this.sortTable(this.najnaj, column)
+            } else if (table === 'cnc'){
+                this.sortTable(this.cnc, column)
             }
         },
         sortTable(data, column) {
@@ -478,6 +487,21 @@ const app = Vue.createApp({
 
                 const response = await axios.get(`http://localhost:3000/lenses-most-ordered`, { params: queryParams });
                 this.najnaj = response.data;
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        // Funkcja do odczytu zakładki cnc
+        async getCnc() {
+            this.cnc = [];
+            try {
+                const queryParams = {
+                    startDate: this.selectedStartDate,
+                    endDate: this.selectedEndDate,
+                };
+
+                const response = await axios.get(`http://localhost:3000/cnc-lenses`, { params: queryParams });
+                this.cnc = response.data;
             } catch (err) {
                 console.error(err);
             }
