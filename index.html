@@ -220,6 +220,7 @@
         <button v-bind:class="{ active: selectedTab === 'glass' }" v-on:click="selectedTab = 'glass'">Szkło</button>
         <button v-bind:class="{ active: selectedTab === 'najnaj' }" v-on:click="selectedTab = 'najnaj'">NAJNAJ</button>
         <button v-bind:class="{ active: selectedTab === 'cnc' }" v-on:click="selectedTab = 'cnc'">CNC</button>
+        <button v-bind:class="{ active: selectedTab === 'dokumenty' }" v-on:click="selectedTab = 'dokumenty'">Dokumenty</button>
     </div>
     <div v-show="selectedTab === 'sales' || selectedTab === 'orders'">
         <div>
@@ -595,6 +596,31 @@
             </tr>
             </tbody>
         </table>
+    </div>
+    <div v-show="selectedTab === 'dokumenty'">
+        <div class="panel-container">
+            <div class="filter-panel">
+                <label for="contractor">Wybierz kontrahenta: </label>
+                <select id="contractor" v-model="selectedContractor">
+                    <option v-for="contractor in filteredContractors" :value="contractor.Numer" :key="contractor.Numer">{{ contractor.Nazwa }}</option>
+                </select>
+                <input type="text" v-model="contractorFilter" placeholder="Filtruj klientów..." />
+                <label for="startDate">Data początkowa: </label>
+                <input type="date" id="startDate" v-model="selectedStartDate">
+                <label for="endDate">Data końcowa: </label>
+                <input type="date" id="endDate" v-model="selectedEndDate">
+            </div>
+        </div>
+        <div v-if="invoicesLoading">
+            Trwa odczyt faktur, proszę czekać...
+        </div>
+        <ul>
+            <li v-for="file in documents" :key="file.NUMER">
+                <a :href="'http://localhost:3000/file/' + file.NUMER" target="_blank">
+                    {{ file.PLIK }} ({{ formatDate(file.PLIKDATA) }})
+                </a>
+            </li>
+        </ul>
     </div>
 </div>
 <!-- Biblioteki skryptów -->

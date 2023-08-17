@@ -56,6 +56,11 @@ const app = Vue.createApp({
             najnaj: [],
             cncColumns: ['Kod_Towaru'],
             cnc: [],
+            selectedContractor: null,
+            contractors: [],
+            documents: [],
+            contractorFilter: '',
+            invoicesLoading: false,
         }
     },
     watch: {
@@ -86,11 +91,14 @@ const app = Vue.createApp({
                 this.fetchClients();
             }else if (this.selectedTab === 'cnc') {
                 this.getCnc();
+            }else if (this.selectedTab === 'dokumenty') {
+                this.fetchContractors();
             }
         },
         selectedProduct: {
             handler(newVal, oldVal) {
                 if (newVal !== oldVal) {
+                    if (newVal === null) return;
                     this.fetchOrdersData();
                     this.fetchSalesData();  // pobranie danych o sprzedaży
                     this.fetchProductDescription();
@@ -108,6 +116,8 @@ const app = Vue.createApp({
                     this.fetchClientTransactionsData();
                 } else if (this.selectedTab === 'cnc') {
                     this.getCnc();
+                } else if (this.selectedTab === 'dokumenty') {
+                    this.getDocuments();
                 }
             }
         },
@@ -117,6 +127,8 @@ const app = Vue.createApp({
                     this.fetchClientTransactionsData();
                 } else if (this.selectedTab === 'cnc') {
                     this.getCnc();
+                } else if (this.selectedTab === 'dokumenty') {
+                    this.getDocuments();
                 }
             }
         },
@@ -137,6 +149,13 @@ const app = Vue.createApp({
             handler(newVal, oldVal) {
                 if (newVal !== oldVal) {
                     this.getLenses();
+                }
+            }
+        },
+        selectedContractor: {
+            handler(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.getDocuments();
                 }
             }
         }
@@ -506,6 +525,33 @@ const app = Vue.createApp({
                 console.error(err);
             }
         },
+        async fetchContractors() {
+            const url = 'http://localhost:3000/contractors';
+            try {
+                const response = await axios.get(url);
+                this.contractors = response.data;
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        // Funkcja do odczytu faktur
+        async getDocuments() {
+            this.invoicesLoading = true;
+            this.documents = [];
+            try {
+                const queryParams = {
+                    startDate: this.selectedStartDate,
+                    endDate: this.selectedEndDate,
+                };
+
+                const response = await axios.get(`http://localhost:3000/files-contractor/${this.selectedContractor}`, { params: queryParams });
+                this.documents = response.data;
+            } catch (err) {
+                console.error(err);
+            } finally {
+                this.invoicesLoading = false;
+            }
+        },
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn
@@ -587,6 +633,11 @@ const app = Vue.createApp({
         },
         filteredGlassesByManufacturer() {
             return this.glasses.filter(glass => glass[this.selectedManufacturer] && glass[this.selectedManufacturer].toLowerCase().includes(this.glassFilter.toLowerCase()));
+        },
+        filteredContractors() {
+            // return this.contractors.filter(contractor => contractor.Nazwa.toLowerCase().includes(this.contractorFilter.toLowerCase()));
+        // and order by nazwa
+            return this.contractors.filter(contractor => contractor.Nazwa.toLowerCase().includes(this.contractorFilter.toLowerCase())).sort((a, b) => a.Nazwa.localeCompare(b.Nazwa));
         }
     }
 })

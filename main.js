@@ -1,7 +1,7 @@
 // main.js
 /**
  * Autor: Paweł Sołtys
- * Data: 2023-07-31
+ * Data: 2023-08-17
  */
 
 // Importowanie modułów node.js
@@ -805,7 +805,77 @@ server.get('/cnc-lenses', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+// kontrahenci
+server.get('/contractors', async (req, res) => {
+    const request = new sql.Request(poolSOD);
 
+    let finalQuery = `
+    SELECT DISTINCT
+        K.NUMER AS Numer,
+        CASE
+            WHEN K.IDENTYFIKATOR = K.NAZWA THEN K.NAZWA
+            ELSE CONCAT(K.NAZWA, ' (', K.IDENTYFIKATOR, ')')
+        END AS Nazwa
+    FROM KONTRAHENT AS K
+    INNER JOIN DOKUMENT AS D ON K.NUMER = D.KONTRAHENT
+    `;
+
+    try {
+        const result = await request.query(finalQuery);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+// pliki kontrahenta
+server.get('/files-contractor/:contractor', async (req, res) => {
+    const contractor = req.params.contractor;
+    const startDate = req.query.startDate || null;
+    const endDate = req.query.endDate || null;
+    try {
+        const request = new sql.Request(poolSOD);
+
+        let baseQuery = `
+        SELECT DISTINCT
+                    D.DOKUMENT
+                FROM DOKUMENT as D
+                LEFT JOIN KONTRAHENT AS K ON D.KONTRAHENT = K.NUMER
+                WHERE K.NUMER = @contractor
+        `;
+        if (startDate && endDate) {
+            baseQuery += `AND DATANADOK BETWEEN @startDate AND @endDate`;
+            request.input('startDate', sql.Date, new Date(startDate));
+            request.input('endDate', sql.Date, new Date(endDate));
+        }
+
+        const docResult = await request
+            .input('contractor', sql.NVarChar, contractor)
+            .query(baseQuery);
+        const documents = docResult.recordset;
+
+        let availableFiles = [];
+        for (let document of documents) {
+            const documentString = document.DOKUMENT.toString();
+            const requestSOD = new sql.Request(poolSODImages);
+            const fileResult = await requestSOD
+                .input('document', sql.NVarChar, documentString)
+                .query(`
+            SELECT PLIK, NUMER, PLIKDATA
+            FROM DOKTRESC
+            WHERE DOKUMENT = @document
+        `);
+            availableFiles.push(...fileResult.recordset);
+        }
+
+        availableFiles.sort((a, b) => new Date(b.PLIKDATA) - new Date(a.PLIKDATA));
+
+        res.json(availableFiles);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
 // Uruchomienie serwera
 server.listen(port, () => console.log(`Server listening at http://localhost:${port}`))
 
