@@ -121,21 +121,27 @@
             padding: 0;
         }
 
-        ul li {
+        ul li, .fileButton {
             margin-bottom: 10px;
             background-color: #f2f2f2;
             border-radius: 4px;
             padding: 10px;
         }
 
-        ul li a {
+        ul li a, .fileButton {
             text-decoration: none;
             color: #333;
             font-weight: bold;
         }
 
-        ul li a:hover {
+        ul li a:hover, .fileButton:hover {
             color: #4CAF50;
+        }
+
+        .fileButton {
+            padding: 0;
+            border: none;
+            background: none;
         }
 
         .clickable {
@@ -153,7 +159,7 @@
         th span span:first-child {
             margin-right: 3px; /* Odstęp między strzałkami */
         }
-        #startMonth, #startYear, #endMonth, #endYear, #startWeek, #endWeek, #search {
+        #startMonth, #startYear, #endMonth, #endYear, #startWeek, #endWeek, .search {
             width: 100%;
             padding: 12px 20px;
             margin: 8px 0;
@@ -164,7 +170,7 @@
             font-size: 16px;
         }
 
-        #search {
+        .search {
             background-color: cornflowerblue;
             color: white;
             border: none;
@@ -172,7 +178,7 @@
             text-align: center;
         }
 
-        #search:hover {
+        .search:hover {
             background-color: dodgerblue;
         }
 
@@ -221,6 +227,7 @@
         <button v-bind:class="{ active: selectedTab === 'najnaj' }" v-on:click="selectedTab = 'najnaj'">NAJNAJ</button>
         <button v-bind:class="{ active: selectedTab === 'cnc' }" v-on:click="selectedTab = 'cnc'">CNC</button>
         <button v-bind:class="{ active: selectedTab === 'dokumenty' }" v-on:click="selectedTab = 'dokumenty'">Dokumenty</button>
+        <button v-bind:class="{ active: selectedTab === 'szukaj' }" v-on:click="selectedTab = 'szukaj'">Szukaj</button>
     </div>
     <div v-show="selectedTab === 'sales' || selectedTab === 'orders'">
         <div>
@@ -256,7 +263,7 @@
                 <select id="endYear" v-model="selectedEndYear">
                     <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
                 </select>
-                <button id="search" v-on:click="getMonthlyCalendar">Szukaj</button>
+                <button class="search" v-on:click="getMonthlyCalendar">Szukaj</button>
             </div>
 
             <!-- Wybór tygodnia i roku dla kalendarza tygodniowego -->
@@ -277,7 +284,7 @@
                 <select id="endYear" v-model="selectedEndYear">
                     <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
                 </select>
-                <button  id="search" v-on:click="getWeeklyCalendar">Szukaj</button>
+                <button  class="search" v-on:click="getWeeklyCalendar">Szukaj</button>
             </div>
         </div>
         <table>
@@ -605,22 +612,88 @@
                     <option v-for="contractor in filteredContractors" :value="contractor.Numer" :key="contractor.Numer">{{ contractor.Nazwa }}</option>
                 </select>
                 <input type="text" v-model="contractorFilter" placeholder="Filtruj klientów..." />
+                <input type="text" v-model="documentType" placeholder="Filtruj typ dokumentu..." />
                 <label for="startDate">Data początkowa: </label>
                 <input type="date" id="startDate" v-model="selectedStartDate">
                 <label for="endDate">Data końcowa: </label>
                 <input type="date" id="endDate" v-model="selectedEndDate">
+            </div>
+            <div class="description-panel">
+                <h2>Dane</h2>
+                    <div v-if="contractorDetails.length > 0">
+                        <div v-if="contractorDetails[0].TYP">
+                            <b>TYP:</b> {{ contractorDetails[0].TYP }}
+                        </div>
+                        <div v-if="contractorDetails[0].NIP">
+                            <b>NIP:</b> {{ contractorDetails[0].NIP }}
+                        </div>
+                        <div v-if="contractorDetails[0].ADRES_KOD">
+                            <b>ADRES_KOD:</b> {{ contractorDetails[0].ADRES_KOD }}
+                        </div>
+                        <div v-if="contractorDetails[0].ADRES_POCZTA">
+                            <b>ADRES_POCZTA:</b> {{ contractorDetails[0].ADRES_POCZTA }}
+                        </div>
+                        <div v-if="contractorDetails[0].ADRES_MIEJSCOWOSC">
+                            <b>ADRES_MIEJSCOWOSC:</b> {{ contractorDetails[0].ADRES_MIEJSCOWOSC }}
+                        </div>
+                        <div v-if="contractorDetails[0].ADRES_ULICA">
+                            <b>ADRES_ULICA:</b> {{ contractorDetails[0].ADRES_ULICA }}
+                        </div>
+                        <div v-if="contractorDetails[0].ADRES_NR_DOMU">
+                            <b>ADRES_NR_DOMU:</b> {{ contractorDetails[0].ADRES_NR_DOMU }}
+                        </div>
+                        <div v-if="contractorDetails[0].TELEFON">
+                            <b>TELEFON:</b> {{ contractorDetails[0].TELEFON }}
+                        </div>
+                </div>
             </div>
         </div>
         <div v-if="invoicesLoading">
             Trwa odczyt faktur, proszę czekać...
         </div>
         <ul>
-            <li v-for="file in documents" :key="file.NUMER">
-                <a :href="'http://localhost:3000/file/' + file.NUMER" target="_blank">
-                    {{ file.PLIK }} ({{ formatDate(file.PLIKDATA) }})
-                </a>
+            <li v-for="file in filteredDocuments" :key="file.NUMER">
+                <button class="fileButton" @click="openDocumentWithDetails(file.NUMER, file.DOKUMENT)">{{ file.PLIK }} ({{ formatDate(file.PLIKDATA) }}) - {{file.NAZWA}} - opis: {{file.OPIS}}</button>
             </li>
         </ul>
+    </div>
+    <div v-show="selectedTab === 'szukaj'">
+        <div class="panel-container">
+            <div class="filter-panel">
+                <input type="text" v-model="searchDescription" placeholder="Szukaj w opisie" />
+                <input type="text" v-model="searchNIP" placeholder="Szukaj po NIPie" />
+                <input type="text" v-model="searchCity" placeholder="Szukaj po mieście" />
+                <input type="text" v-model="searchCode" placeholder="Szukaj po kodzie pocztowym" />
+                <button class="search" @click="searchContractors()">Szukaj</button>
+            </div>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th class="clickableLight centered" v-for="column in searchColumns" :key="column" @click="sortByColumn(column, 'search')">
+                    {{ column }}
+                    <span v-if="sort.column === column">
+                            <span v-if="sort.ascending">↑</span>
+                            <span v-else>↓</span>
+                         </span>
+                    <span v-else>
+                            <span>↑</span><span>↓</span>
+                        </span>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="row in foundContractors" :key="foundContractors.NUMER">
+                <td class="clickable" @click="showContractor(row['NUMER'])">{{ row['NUMER'] || '-' }}</td>
+                <td>{{ row['NIP'] || '-' }}</td>
+                <td>{{ row['NAZWA'] || '-' }}</td>
+                <td>{{ row['ADRES_KOD'] || '-' }}</td>
+                <td>{{ row['ADRES_KOR_KOD'] || '-' }}</td>
+                <td>{{ row['ADRES_MIEJSCOWOSC'] || '-' }}</td>
+                <td>{{ row['ADRES_KOR_MIEJSCOWOSC'] || '-' }}</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 <!-- Biblioteki skryptów -->

@@ -1,0 +1,21 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Odczyt Danych z Bazy Danych - Paweł Sołtys</title>
+    <!-- Polityka zabezpieczeń treści -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com;">
+    <style>
+    </style>
+</head>
+<body>
+<div id="app">  <!-- Kontener dla aplikacji Vue.js -->
+    <pre>{{ JSON.stringify(fileDetails, null, 2) }}</pre>
+</div>
+<!-- Biblioteki skryptów -->
+<script src="https://unpkg.com/vue@next"></script>  <!-- Vue.js -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>  <!-- Axios.js -->
+<script src="rendererFileDetails.js"></script>  <!-- Główny skrypt -->
+</body>
+</html>

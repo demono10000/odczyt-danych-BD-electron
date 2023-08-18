@@ -58,9 +58,17 @@ const app = Vue.createApp({
             cnc: [],
             selectedContractor: null,
             contractors: [],
+            contractorDetails: [],
             documents: [],
             contractorFilter: '',
             invoicesLoading: false,
+            documentType: '',
+            searchDescription: '',
+            searchNIP: '',
+            searchCity: '',
+            searchCode: '',
+            foundContractors: [],
+            searchColumns: ['NUMER', 'NIP', 'NAZWA', 'ADRES_KOD', 'ADRES_KOR_KOD', 'ADRES_MIEJSCOWOSC', 'ADRES_KOR_MIEJSCOWOSC'],
         }
     },
     watch: {
@@ -337,6 +345,11 @@ const app = Vue.createApp({
             this.selectedTab = 'client';
             this.fetchClientTransactionsData();
         },
+        showContractor(contractor) {
+            this.selectedContractor = contractor;
+            this.selectedTab = 'dokumenty';
+            this.getDocuments();
+        },
         sortByColumn(column, table) {
             // Przełączanie trybu sortowania
             if (this.sort.column === column) {
@@ -361,6 +374,8 @@ const app = Vue.createApp({
                 this.sortTable(this.najnaj, column)
             } else if (table === 'cnc'){
                 this.sortTable(this.cnc, column)
+            } else if (table === 'search'){
+                this.sortTable(this.foundContractors, column)
             }
         },
         sortTable(data, column) {
@@ -525,11 +540,22 @@ const app = Vue.createApp({
                 console.error(err);
             }
         },
+        // pobierz kontrahentów
         async fetchContractors() {
             const url = 'http://localhost:3000/contractors';
             try {
                 const response = await axios.get(url);
                 this.contractors = response.data;
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        // pobierz kontrahenta szczegóły
+        async fetchContractorDetails() {
+            const url = 'http://localhost:3000/contractor/' + this.selectedContractor;
+            try {
+                const response = await axios.get(url);
+                this.contractorDetails = response.data;
             } catch (err) {
                 console.error(err);
             }
@@ -551,7 +577,39 @@ const app = Vue.createApp({
             } finally {
                 this.invoicesLoading = false;
             }
+            this.fetchContractorDetails();
         },
+        openDocumentWithDetails(id, dokument){
+            let url = `http://localhost:3000/file/${id}`;
+            let width = 800; // Szerokość okna
+            let height = 600; // Wysokość okna
+            let left = (window.innerWidth - width) / 5; // Ustawienie pozycji X
+            let top = (window.innerHeight - height) / 2; // Ustawienie pozycji Y
+            window.open(url, 'FileWindow', `width=${width}, height=${height}, left=${left}, top=${top}`);
+
+            url = `http://localhost:4000/fileDetails.html?id=${dokument}`;
+            width = 400; // Szerokość okna
+            height = 600; // Wysokość okna
+            left = (window.innerWidth - width) / 5 * 4.5; // Ustawienie pozycji X
+            top = (window.innerHeight - height) / 2; // Ustawienie pozycji Y
+            window.open(url, 'FileDetailsWindow', `width=${width}, height=${height}, left=${left}, top=${top}`);
+        },
+        async searchContractors() {
+            this.foundContractors = [];
+            try {
+                const queryParams = {
+                    description: this.searchDescription,
+                    nip: this.searchNIP,
+                    city: this.searchCity,
+                    code: this.searchCode,
+                };
+
+                const response = await axios.get(`http://localhost:3000/contractors-filtered`, { params: queryParams });
+                this.foundContractors = response.data;
+            } catch (err) {
+                console.error(err);
+            }
+        }
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn
@@ -635,9 +693,10 @@ const app = Vue.createApp({
             return this.glasses.filter(glass => glass[this.selectedManufacturer] && glass[this.selectedManufacturer].toLowerCase().includes(this.glassFilter.toLowerCase()));
         },
         filteredContractors() {
-            // return this.contractors.filter(contractor => contractor.Nazwa.toLowerCase().includes(this.contractorFilter.toLowerCase()));
-        // and order by nazwa
             return this.contractors.filter(contractor => contractor.Nazwa.toLowerCase().includes(this.contractorFilter.toLowerCase())).sort((a, b) => a.Nazwa.localeCompare(b.Nazwa));
+        },
+        filteredDocuments() {
+            return this.documents.filter(document => document.NAZWA.toLowerCase().includes(this.documentType.toLowerCase()));
         }
     }
 })

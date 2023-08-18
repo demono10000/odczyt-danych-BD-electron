@@ -1,7 +1,7 @@
 // main.js
 /**
  * Autor: Paweł Sołtys
- * Data: 2023-08-17
+ * Data: 2023-08-18
  */
 
 // Importowanie modułów node.js
@@ -633,7 +633,7 @@ server.get('/customer-transactions/:client', async (req, res) => {
     const request = new sql.Request(pool);
     request.input('client', sql.NVarChar, client);
 
-    const baseQuery  = `
+    let finalQuery = `
 WITH ranked_rows AS (
   SELECT
     a.ZaE_TwrKod AS Kod_Towaru,
@@ -661,7 +661,6 @@ SELECT
             END) AS Zamówione
         FROM ranked_rows
     `;
-    let finalQuery = baseQuery;
     if(startDate && endDate) {
         finalQuery += ` WHERE Data BETWEEN @startDate AND @endDate`;
         request.input('startDate', sql.Date, new Date(startDate));
@@ -828,6 +827,26 @@ server.get('/contractors', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+// kontrahent szczegóły
+server.get('/contractor/:id', async (req, res) => {
+    const id = req.params.id;
+    const request = new sql.Request(poolSOD);
+
+    let finalQuery = `
+    SELECT DISTINCT
+    K.TYP, K.NIP, K.ADRES_KOD, K.ADRES_POCZTA, K.ADRES_MIEJSCOWOSC, K.ADRES_ULICA, K.ADRES_NR_DOMU, K.TELEFON
+    FROM KONTRAHENT AS K
+    WHERE K.NUMER = @id
+    `;
+    request.input('id', sql.Int, parseInt(id));
+    try {
+        const result = await request.query(finalQuery);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
 // pliki kontrahenta
 server.get('/files-contractor/:contractor', async (req, res) => {
     const contractor = req.params.contractor;
@@ -837,10 +856,10 @@ server.get('/files-contractor/:contractor', async (req, res) => {
         const request = new sql.Request(poolSOD);
 
         let baseQuery = `
-        SELECT DISTINCT
-                    D.DOKUMENT
+        SELECT
+                D.DOKUMENT, D.NAZWA, D.OPIS
                 FROM DOKUMENT as D
-                LEFT JOIN KONTRAHENT AS K ON D.KONTRAHENT = K.NUMER
+                LEFT JOIN KONTRAHENT AS K ON D.KONTRAHENT = K.NUMER 
                 WHERE K.NUMER = @contractor
         `;
         if (startDate && endDate) {
@@ -857,11 +876,15 @@ server.get('/files-contractor/:contractor', async (req, res) => {
         let availableFiles = [];
         for (let document of documents) {
             const documentString = document.DOKUMENT.toString();
+            const clientName = document.NAZWA;
+            const description = document.OPIS;
             const requestSOD = new sql.Request(poolSODImages);
             const fileResult = await requestSOD
                 .input('document', sql.NVarChar, documentString)
+                .input('clientName', sql.NVarChar, clientName)
+                .input('opis', sql.NVarChar, description)
                 .query(`
-            SELECT PLIK, NUMER, PLIKDATA
+            SELECT PLIK, NUMER, PLIKDATA, @clientName AS NAZWA, @opis AS OPIS, @document AS DOKUMENT
             FROM DOKTRESC
             WHERE DOKUMENT = @document
         `);
@@ -871,6 +894,69 @@ server.get('/files-contractor/:contractor', async (req, res) => {
         availableFiles.sort((a, b) => new Date(b.PLIKDATA) - new Date(a.PLIKDATA));
 
         res.json(availableFiles);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+// odczyt szczegółów dokumentu z SOD
+server.get('/fileDetails/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const request = new sql.Request(poolSOD);
+
+        let finalQuery = `
+        SELECT
+        *
+        FROM DOKUMENT as D
+        WHERE D.NUMER = @id
+        `;
+        const result = await request
+            .input('id', sql.Int, parseInt(id))
+            .query(finalQuery);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+// kontrahenci z filtrami
+server.get('/contractors-filtered', async (req, res) => {
+    const description = req.query.description || null;
+    const nip = req.query.nip || null;
+    const city = req.query.city || null;
+    const code = req.query.code || null;
+
+    const request = new sql.Request(poolSOD);
+
+    let finalQuery = `
+    SELECT DISTINCT
+        K.NUMER, K.NIP, K.NAZWA, K.ADRES_KOD, K.ADRES_KOR_KOD, K.ADRES_MIEJSCOWOSC, K.ADRES_KOR_MIEJSCOWOSC
+    FROM KONTRAHENT AS K
+    LEFT JOIN DOKUMENT AS D ON K.NUMER = D.KONTRAHENT
+    WHERE 1 = 1
+    `;
+    if (description) {
+        finalQuery += ` AND D.OPIS LIKE @description`;
+        request.input('description', sql.NVarChar, '%' + description + '%');
+    }
+    if (nip) {
+        finalQuery += ` AND REPLACE(REPLACE(K.NIP, '-', ''), ' ', '') LIKE @nip`;
+        request.input('nip', sql.NVarChar, nip + '%');
+    }
+    if (city) {
+        finalQuery += ` AND (K.ADRES_MIEJSCOWOSC LIKE @city OR K.ADRES_KOR_MIEJSCOWOSC LIKE @city)`;
+        request.input('city', sql.NVarChar, '%' + city + '%');
+    }
+    if (code) {
+        finalQuery += ` AND (K.ADRES_KOD LIKE @code OR K.ADRES_KOR_KOD LIKE @code)`;
+        request.input('code', sql.NVarChar, code + '%');
+    }
+    console.log(code)
+    console.log(finalQuery);
+    try {
+        const result = await request.query(finalQuery);
+        res.json(result.recordset);
     } catch (err) {
         console.error(err);
         res.status(500).send(err.message);
