@@ -625,14 +625,14 @@ const app = Vue.createApp({
             const workbook = XLSX.utils.book_new();
 
             if (name === 'salesororders') {
-                const data = this.transformedData.map(obj => Object.values(obj));
+                const data = this.zamienNaLiczby(this.transformedData.map(obj => Object.values(obj)));
                 const columnNames = this.columns;
 
                 const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
                 XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
             } else if (name === 'lenses') {
-                const data1 = this.filteredOrdersData.map(obj => Object.values(obj));
-                const data2 = this.filteredSalesData.map(obj => Object.values(obj));
+                const data1 = this.zamienNaLiczby(this.filteredOrdersData.map(obj => Object.values(obj)));
+                const data2 = this.zamienNaLiczby(this.filteredSalesData.map(obj => Object.values(obj)));
 
                 const columnNames1 = ['Data', 'Ilość', 'Cena', 'Wartość', 'zakończone', 'Bestellung', 'Klient', 'NrZamówienia', 'cnc_frez', 'cnc_poler', 'cnc_centr', 'powłoka'];
                 const columnNames2 = ['Data', 'TrN_GIDNumer', 'Ilość', 'Cena', 'Wartość', 'Bestellung', 'Klient', 'NrFaktury'];
@@ -643,31 +643,31 @@ const app = Vue.createApp({
                 XLSX.utils.book_append_sheet(workbook, worksheet1, 'Zamówienia');
                 XLSX.utils.book_append_sheet(workbook, worksheet2, 'Sprzedaż');
             } else if (name === 'client') {
-                const data = this.clientTransactions.map(obj => Object.values(obj));
+                const data = this.zamienNaLiczby(this.clientTransactions.map(obj => Object.values(obj)));
                 const columnNames = ['Kod_Towaru', 'Wysłane', 'Zamówione'];
 
                 const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
                 XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
             } else if (name === 'glass') {
-                const data = this.lenses.map(obj => Object.values(obj));
+                const data = this.zamienNaLiczby(this.lenses.map(obj => Object.values(obj)));
                 const columnNames = ['Soczewka'];
 
                 const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
                 XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
             } else if (name === 'najnaj') {
-                const data = this.najnaj.map(obj => Object.values(obj));
+                const data = this.zamienNaLiczby(this.najnaj.map(obj => Object.values(obj)));
                 const columnNames = ['Kod_Towaru', 'Zamówienia'];
 
                 const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
                 XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
             } else if (name === 'cnc') {
-                const data = this.cnc.map(obj => Object.values(obj));
+                const data = this.zamienNaLiczby(this.cnc.map(obj => Object.values(obj)));
                 const columnNames = ['Kod_Towaru'];
 
                 const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
                 XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
             } else if (name === 'szukaj') {
-                const data = this.foundContractors.map(obj => Object.values(obj));
+                const data = this.zamienNaLiczby(this.foundContractors.map(obj => Object.values(obj)));
                 const columnNames = ['Numer', 'NIP', 'Nazwa', 'Kod', 'Kod korespondencyjny', 'Miejscowość', 'Miejscowość korespondencyjna'];
 
                 const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
@@ -677,6 +677,15 @@ const app = Vue.createApp({
             const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
             ipcRenderer.send('save-excel-dialog', excelData);
+        },
+        // Define a function to convert numeric values to floats
+        zamienNaLiczby(data) {
+            return data.map(obj =>
+                Object.values(obj).map(value => {
+                    const parsedValue = parseFloat(value);
+                    return isNaN(parsedValue) ? value : parsedValue;
+                })
+            );
         },
         // Funkcja do odczytu typów dokument ow
         async getDocumentTypes() {
