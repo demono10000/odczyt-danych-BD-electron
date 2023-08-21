@@ -634,6 +634,10 @@
                     <option v-for="contractor in filteredContractors" :value="contractor.Numer" :key="contractor.Numer">{{ contractor.Nazwa }}</option>
                 </select>
                 <input type="text" v-model="contractorFilter" placeholder="Filtruj klientów..." />
+                <label for="doc-type">Wybierz typ dokumentu: </label>
+                <select id="doc-type" v-model="selectedDocumentType">
+                    <option v-for="type in documentTypes" :value="type.NAZWA" :key="type.NAZWA">{{ type.NAZWA }}</option>
+                </select>
                 <input type="text" v-model="documentType" placeholder="Filtruj typ dokumentu..." />
                 <label for="startDate">Data początkowa: </label>
                 <input type="date" id="startDate" v-model="selectedStartDate">

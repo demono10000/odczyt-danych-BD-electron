@@ -71,6 +71,8 @@ const app = Vue.createApp({
             searchCode: '',
             foundContractors: [],
             searchColumns: ['NUMER', 'NIP', 'NAZWA', 'ADRES_KOD', 'ADRES_KOR_KOD', 'ADRES_MIEJSCOWOSC', 'ADRES_KOR_MIEJSCOWOSC'],
+            documentTypes: [],
+            selectedDocumentType: null,
         }
     },
     watch: {
@@ -103,6 +105,7 @@ const app = Vue.createApp({
                 this.getCnc();
             }else if (this.selectedTab === 'dokumenty') {
                 this.fetchContractors();
+                this.getDocumentTypes();
             }
         },
         selectedProduct: {
@@ -169,7 +172,12 @@ const app = Vue.createApp({
                     this.getDocuments();
                 }
             }
-        }
+        },
+        selectedDocumentType: {
+            handler(newVal, oldVal) {
+                this.documentType = newVal;
+            }
+        },
     },
     created() {
         this.fetchData();  // Pobierz dane na początku
@@ -669,7 +677,18 @@ const app = Vue.createApp({
             const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
             ipcRenderer.send('save-excel-dialog', excelData);
-        }
+        },
+        // Funkcja do odczytu typów dokument ow
+        async getDocumentTypes() {
+            this.documentTypes = [];
+            const url = 'http://localhost:3000/documentTypes';
+            try {
+                const response = await axios.get(url);
+                this.documentTypes = response.data;
+            } catch (err) {
+                console.error(err);
+            }
+        },
     },
     computed: {
         // Obliczenia dla dynamicznych kolumn

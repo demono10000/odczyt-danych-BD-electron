@@ -956,6 +956,24 @@ server.get('/contractors-filtered', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+// typy dokumentów
+server.get('/documentTypes', async (req, res) => {
+    const request = new sql.Request(poolSOD);
+
+    let finalQuery = `
+    SELECT DISTINCT
+        D.NAZWA
+        FROM DOKUMENT as D
+    ORDER BY D.NAZWA ASC
+    `;
+    try {
+        const result = await request.query(finalQuery);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
 // Uruchomienie serwera
 server.listen(port, () => console.log(`Server listening at http://localhost:${port}`))
 
