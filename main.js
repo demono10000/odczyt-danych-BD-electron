@@ -475,20 +475,15 @@ server.get('/product-sales/:code', async (req, res) => {
             WHEN nag.TrN_TrNTyp = 20 THEN 'FSE-'
             ELSE 'FS-'
         END + nag.TrN_TrNSeria + '/' + CAST(nag.TrN_TrNNumer AS NVARCHAR) + '/' + CAST(nag.TrN_TrNRok AS NVARCHAR) AS NrFaktury
-      FROM
-        cdn.zamelem a
-        INNER JOIN cdn.zamnag b ON b.ZaN_GIDNumer=a.ZaE_GIDNumer
-        LEFT JOIN cdn.TraElem elem ON elem.TrE_TwrKod=a.ZaE_TwrKod AND b.Zan_DokumentObcy = elem.TrE_TwrNazwa
+    FROM
+        cdn.TraElem elem
         LEFT JOIN cdn.traNag nag ON nag.TrN_GIDTyp=elem.TrE_GIDTyp AND nag.TrN_GIDNumer=elem.TrE_GIDNumer
-        LEFT JOIN cdn.KntAdresy e ON e.KnA_GIDNumer= a.ZaE_KntNumer
-        LEFT JOIN cdn.atrybuty atr ON b.ZaN_GIDNumer=atr.Atr_ObiNumer
-        WHERE
-            elem.TrE_Twrkod = '${code}'
+        LEFT JOIN cdn.atrybuty atr ON elem.TrE_GIDNumer=atr.Atr_ObiNumer AND atr.Atr_AtkId = 18
+    
+    WHERE
+        elem.TrE_Twrkod = '${code}'
         AND
-            elem.TrE_KntTyp = 32
-        AND
-            atr.Atr_AtkId = 18
-        ORDER BY Data DESC
+        elem.TrE_KntTyp = 32
     `;
 
     try {
