@@ -1,23 +1,24 @@
 // main.js
 /**
  * Autor: Paweł Sołtys
- * Data: 2023-08-18
+ * Data: 2023-08-21
  */
 
 // Importowanie modułów node.js
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const express = require('express')
 const sql = require('mssql')
 const path = require('path');
-const cors = require('cors')
+const cors = require('cors');
 const zlib = require('zlib');
 
 // Stworzenie serwera Express.js na porcie 3000
-const server = express()
-const port = 3000
+const server = express();
+const port = 3000;
 
 const secret = require('./secret.js'); // Importowanie poufnych danych, takich jak nazwa użytkownika i hasło do bazy danych
-const glasses = require('./data_files/glasses_grouped.json'); // Importowanie danych dotyczących szkieł
+const glasses = require('./data_files/glasses_grouped.json');
+const {writeFile} = require("fs"); // Importowanie danych dotyczących szkieł
 
 // Konfiguracja połączenia do bazy danych
 const config = {
@@ -952,8 +953,6 @@ server.get('/contractors-filtered', async (req, res) => {
         finalQuery += ` AND (K.ADRES_KOD LIKE @code OR K.ADRES_KOR_KOD LIKE @code)`;
         request.input('code', sql.NVarChar, code + '%');
     }
-    console.log(code)
-    console.log(finalQuery);
     try {
         const result = await request.query(finalQuery);
         res.json(result.recordset);
@@ -1008,3 +1007,24 @@ app.on('activate', () => {
         createWindow()
     }
 })
+
+ipcMain.on('save-excel-dialog', (event, excelData) => {
+    console.log('Zapisywanie pliku Excel');
+    dialog.showSaveDialog(
+        {
+            title: 'Zapisz jako plik Excel',
+            defaultPath: 'nazwa-pliku.xlsx',
+            filters: [{name: 'Pliki Excel', extensions: ['xlsx']}],
+        }
+    ).then(r => {
+        if(!r.canceled){
+            writeFile(r.filePath, excelData, (err) => {
+                if (err) {
+                    console.error('Błąd podczas zapisywania pliku:', err);
+                } else {
+                    console.log('Plik Excel został zapisany:', r.filePath);
+                }
+            });
+        }
+    });
+});

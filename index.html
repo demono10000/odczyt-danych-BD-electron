@@ -212,6 +212,23 @@
             transform: scale(1.02);
         }
 
+        .excelButton {
+            background-color: #4caf50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .excelButton:hover {
+            background-color: #45a049;
+        }
     </style>
 
 </head>
@@ -287,6 +304,7 @@
                 <button  class="search" v-on:click="getWeeklyCalendar">Szukaj</button>
             </div>
         </div>
+        <button class="excelButton" v-on:click="downloadExcel('salesororders')">Pobierz Excel</button>
         <table>
             <!-- Wyświetlanie odpowiednich kolumn w zależności od wybranej zakładki -->
             <thead>
@@ -354,6 +372,7 @@
         </div>
         <!-- Wyświetlanie opisu towaru -->
         <p>{{ productDescription }}</p>
+        <button class="excelButton" v-on:click="downloadExcel('lenses')">Pobierz Excel</button>
         <!-- Tabela zamówień -->
         <h2>Zamówienia</h2>
         <div class="scrollable-table">
@@ -459,6 +478,7 @@
                 <input type="date" id="endDate" v-model="selectedEndDate">
             </div>
         </div>
+        <button class="excelButton" v-on:click="downloadExcel('client')">Pobierz Excel</button>
         <table>
             <thead>
                 <tr>
@@ -515,7 +535,7 @@
                 <input type="text" v-model="glassSearch" placeholder="Znajdź szkło..." />
             </div>
         </div>
-
+        <button class="excelButton" v-on:click="downloadExcel('glass')">Pobierz Excel</button>
         <table>
             <thead>
             <tr>
@@ -550,6 +570,7 @@
             </div>
             <button class="button" @click="getNajnaj()">Szukaj</button>
         </div>
+        <button class="excelButton" v-on:click="downloadExcel('najnaj')">Pobierz Excel</button>
         <table>
             <thead>
             <tr>
@@ -582,6 +603,7 @@
                 <input type="date" id="endDate" v-model="selectedEndDate">
             </div>
         </div>
+        <button class="excelButton" v-on:click="downloadExcel('cnc')">Pobierz Excel</button>
         <table>
             <thead>
             <tr>
@@ -667,6 +689,7 @@
                 <button class="search" @click="searchContractors()">Szukaj</button>
             </div>
         </div>
+        <button class="excelButton" v-on:click="downloadExcel('szukaj')">Pobierz Excel</button>
         <table>
             <thead>
             <tr>

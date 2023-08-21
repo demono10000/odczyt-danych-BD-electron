@@ -1,5 +1,7 @@
 // renderer.js
-
+const { ipcRenderer } = require('electron');
+const XLSX = require('xlsx');
+const fs = require('fs');
 // Tworzenie aplikacji Vue.js
 const app = Vue.createApp({
     data() {
@@ -131,7 +133,8 @@ const app = Vue.createApp({
         },
         selectedEndDate: function (newVal, oldVal) {
             this.filterData();
-                if (this.selectedStartDate && this.selectedEndDate) {if (this.selectedTab === 'client') {
+            if (this.selectedStartDate && this.selectedEndDate) {
+                if (this.selectedTab === 'client') {
                     this.fetchClientTransactionsData();
                 } else if (this.selectedTab === 'cnc') {
                     this.getCnc();
@@ -609,6 +612,63 @@ const app = Vue.createApp({
             } catch (err) {
                 console.error(err);
             }
+        },
+        downloadExcel(name) {
+            const workbook = XLSX.utils.book_new();
+
+            if (name === 'salesororders') {
+                const data = this.transformedData.map(obj => Object.values(obj));
+                const columnNames = this.columns;
+
+                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+            } else if (name === 'lenses') {
+                const data1 = this.filteredOrdersData.map(obj => Object.values(obj));
+                const data2 = this.filteredSalesData.map(obj => Object.values(obj));
+
+                const columnNames1 = ['Data', 'Ilość', 'Cena', 'Wartość', 'zakończone', 'Bestellung', 'Klient', 'NrZamówienia', 'cnc_frez', 'cnc_poler', 'cnc_centr', 'powłoka'];
+                const columnNames2 = ['Data', 'TrN_GIDNumer', 'Ilość', 'Cena', 'Wartość', 'Bestellung', 'Klient', 'NrFaktury'];
+
+                const worksheet1 = XLSX.utils.aoa_to_sheet([columnNames1, ...data1]);
+                const worksheet2 = XLSX.utils.aoa_to_sheet([columnNames2, ...data2]);
+
+                XLSX.utils.book_append_sheet(workbook, worksheet1, 'Zamówienia');
+                XLSX.utils.book_append_sheet(workbook, worksheet2, 'Sprzedaż');
+            } else if (name === 'client') {
+                const data = this.clientTransactions.map(obj => Object.values(obj));
+                const columnNames = ['Kod_Towaru', 'Wysłane', 'Zamówione'];
+
+                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+            } else if (name === 'glass') {
+                const data = this.lenses.map(obj => Object.values(obj));
+                const columnNames = ['Soczewka'];
+
+                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+            } else if (name === 'najnaj') {
+                const data = this.najnaj.map(obj => Object.values(obj));
+                const columnNames = ['Kod_Towaru', 'Zamówienia'];
+
+                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+            } else if (name === 'cnc') {
+                const data = this.cnc.map(obj => Object.values(obj));
+                const columnNames = ['Kod_Towaru'];
+
+                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+            } else if (name === 'szukaj') {
+                const data = this.foundContractors.map(obj => Object.values(obj));
+                const columnNames = ['Numer', 'NIP', 'Nazwa', 'Kod', 'Kod korespondencyjny', 'Miejscowość', 'Miejscowość korespondencyjna'];
+
+                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+            }
+
+            const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+
+            ipcRenderer.send('save-excel-dialog', excelData);
         }
     },
     computed: {
