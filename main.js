@@ -1,7 +1,7 @@
 // main.js
 /**
  * Autor: Paweł Sołtys
- * Data: 2023-08-21
+ * Data: 2023-08-22
  */
 
 // Importowanie modułów node.js

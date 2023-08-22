@@ -712,11 +712,13 @@ const app = Vue.createApp({
         zamienNaLiczby(data) {
             return data.map(obj =>
                 Object.values(obj).map(value => {
-                    if (typeof value === 'string' && !isNaN(value.replace(/-/g, ''))) {
-                        return value.replace(/-/g, ''); // Jeśli wartość jest liczbą z myślnikami, usuń myślniki
-                    } else {
+                    if (typeof value === 'number') return value;
+                    if (value === null) return value;
+                    if (value.indexOf('-') !== -1 && value.indexOf('-') !== 0) {
                         return value;
                     }
+                    const parsedValue = parseFloat(value);
+                    return isNaN(parsedValue) ? value : parsedValue;
                 })
             );
         },
