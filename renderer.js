@@ -1,6 +1,7 @@
 // renderer.js
 const { ipcRenderer } = require('electron');
-const XLSX = require('xlsx');
+// const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 const fs = require('fs');
 // Tworzenie aplikacji Vue.js
 const app = Vue.createApp({
@@ -622,14 +623,17 @@ const app = Vue.createApp({
             }
         },
         downloadExcel(name) {
-            const workbook = XLSX.utils.book_new();
+            const workbook = new ExcelJS.Workbook();
 
             if (name === 'salesororders') {
                 const data = this.zamienNaLiczby(this.transformedData.map(obj => Object.values(obj)));
                 const columnNames = this.columns;
 
-                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+                const worksheet = workbook.addWorksheet('Dane');
+                worksheet.addRow(columnNames);
+                data.forEach(row => {
+                    worksheet.addRow(row);
+                });
             } else if (name === 'lenses') {
                 const data1 = this.zamienNaLiczby(this.filteredOrdersData.map(obj => Object.values(obj)));
                 const data2 = this.zamienNaLiczby(this.filteredSalesData.map(obj => Object.values(obj)));
@@ -637,57 +641,86 @@ const app = Vue.createApp({
                 const columnNames1 = ['Data', 'Ilość', 'Cena', 'Wartość', 'zakończone', 'Bestellung', 'Klient', 'NrZamówienia', 'cnc_frez', 'cnc_poler', 'cnc_centr', 'powłoka'];
                 const columnNames2 = ['Data', 'TrN_GIDNumer', 'Ilość', 'Cena', 'Wartość', 'Bestellung', 'Klient', 'NrFaktury'];
 
-                const worksheet1 = XLSX.utils.aoa_to_sheet([columnNames1, ...data1]);
-                const worksheet2 = XLSX.utils.aoa_to_sheet([columnNames2, ...data2]);
+                const worksheet1 = workbook.addWorksheet('Zamówienia');
+                const worksheet2 = workbook.addWorksheet('Sprzedaż');
 
-                XLSX.utils.book_append_sheet(workbook, worksheet1, 'Zamówienia');
-                XLSX.utils.book_append_sheet(workbook, worksheet2, 'Sprzedaż');
+                worksheet1.addRow(columnNames1);
+                data1.forEach(row => {
+                    worksheet1.addRow(row);
+                });
+
+                worksheet2.addRow(columnNames2);
+                data2.forEach(row => {
+                    worksheet2.addRow(row);
+                });
             } else if (name === 'client') {
                 const data = this.zamienNaLiczby(this.clientTransactions.map(obj => Object.values(obj)));
                 const columnNames = ['Kod_Towaru', 'Wysłane', 'Zamówione'];
 
-                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+                const worksheet = workbook.addWorksheet('Dane');
+                worksheet.addRow(columnNames);
+                data.forEach(row => {
+                    worksheet.addRow(row);
+                });
             } else if (name === 'glass') {
                 const data = this.zamienNaLiczby(this.lenses.map(obj => Object.values(obj)));
                 const columnNames = ['Soczewka'];
 
-                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+                const worksheet = workbook.addWorksheet('Dane');
+                worksheet.addRow(columnNames);
+                data.forEach(row => {
+                    worksheet.addRow(row);
+                });
             } else if (name === 'najnaj') {
                 const data = this.zamienNaLiczby(this.najnaj.map(obj => Object.values(obj)));
                 const columnNames = ['Kod_Towaru', 'Zamówienia'];
 
-                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+                const worksheet = workbook.addWorksheet('Dane');
+                worksheet.addRow(columnNames);
+                data.forEach(row => {
+                    worksheet.addRow(row);
+                });
             } else if (name === 'cnc') {
                 const data = this.zamienNaLiczby(this.cnc.map(obj => Object.values(obj)));
                 const columnNames = ['Kod_Towaru'];
 
-                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+                const worksheet = workbook.addWorksheet('Dane');
+                worksheet.addRow(columnNames);
+                data.forEach(row => {
+                    worksheet.addRow(row);
+                });
             } else if (name === 'szukaj') {
                 const data = this.zamienNaLiczby(this.foundContractors.map(obj => Object.values(obj)));
                 const columnNames = ['Numer', 'NIP', 'Nazwa', 'Kod', 'Kod korespondencyjny', 'Miejscowość', 'Miejscowość korespondencyjna'];
 
-                const worksheet = XLSX.utils.aoa_to_sheet([columnNames, ...data]);
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Dane');
+                const worksheet = workbook.addWorksheet('Dane');
+                worksheet.addRow(columnNames);
+                data.forEach(row => {
+                    worksheet.addRow(row);
+                });
             }
 
-            const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
-
-            ipcRenderer.send('save-excel-dialog', excelData);
+            workbook.xlsx.writeBuffer()
+                .then((excelData) => {
+                    ipcRenderer.send('save-excel-dialog', excelData);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
         },
-        // Define a function to convert numeric values to floats
+        // zamień dane na liczby
         zamienNaLiczby(data) {
             return data.map(obj =>
                 Object.values(obj).map(value => {
-                    const parsedValue = parseFloat(value);
-                    return isNaN(parsedValue) ? value : parsedValue;
+                    if (typeof value === 'string' && !isNaN(value.replace(/-/g, ''))) {
+                        return value.replace(/-/g, ''); // Jeśli wartość jest liczbą z myślnikami, usuń myślniki
+                    } else {
+                        return value;
+                    }
                 })
             );
         },
-        // Funkcja do odczytu typów dokument ow
+        // Funkcja do odczytu typów dokumentów
         async getDocumentTypes() {
             this.documentTypes = [];
             const url = 'http://localhost:3000/documentTypes';

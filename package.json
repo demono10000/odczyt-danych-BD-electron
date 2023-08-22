@@ -1,6 +1,6 @@
 {
   "name": "odczyt_danych_bd",
-  "version": "1.12.3",
+  "version": "1.12.4",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -19,12 +19,12 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "exceljs": "^4.3.0",
     "express": "^4.18.2",
     "mssql": "^9.1.1",
     "vue": "^3.3.4",
     "vue-next-select": "^2.10.5",
-    "vuetify": "^3.3.10",
-    "xlsx": "^0.18.5"
+    "vuetify": "^3.3.10"
   },
   "build": {
     "appId": "pl.pawelsoltys.sumafaktur",
